@@ -1,0 +1,92 @@
+.editor{
+    position: absolute;
+    width: 300px;
+    height: 140px;
+
+    border-radius: 6px;
+    padding: 5px;
+
+
+    background: GhostWhite;
+
+    box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+
+
+}
+
+.editor-h1{
+    font-family: Lato,sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 1.57px;
+    color: black;
+    margin: 0;
+}
+
+.resume{
+    background-color: #f5f0ff !important;
+    border-color: #6f42c1 !important;
+    color:#6f42c1 !important;
+    text-decoration: none !important;
+
+    border: 1px solid;
+    padding: 10px 35px;
+    font-size: 15px;
+    white-space: nowrap;
+    margin: 10px;
+    font-family: 'Lato', 'Helvetica', 'Arial', 'sans-serif';
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 300px;
+
+
+}
+
+.info-door{
+    margin: 10px;
+
+
+
+
+    border-radius: 6px;
+    padding: 1.25rem;
+
+
+    background: #fafbfc;
+
+    box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+
+
+}
+
+.language-bubble{
+    font-size: 12px!important;
+    color: #586069!important;
+}
+
+.code-button{
+    background-color: #f5f0ff !important;
+    border-color: #6f42c1 !important;
+    color:#6f42c1 !important;
+    text-decoration: none !important;
+
+    border: 1px solid;
+    padding: 8px 20px;
+    font-size: 10px;
+    white-space: nowrap;
+    margin: 10px;
+    font-family: 'Lato', 'Helvetica', 'Arial', 'sans-serif';
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 300px;
+
+
+}
+
+.basic-code{
+    color:black
+}
+
+.know-more{
+    background-color: #fafbfc !important;
+}
