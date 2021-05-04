@@ -1,8 +1,10 @@
 .header{
     margin-top: 100px;
-
 }
 
+.quote{
+    margin-top: 100px;
+}
 
 .editor-header{
     display: grid;
