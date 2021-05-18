@@ -24,9 +24,9 @@
 }
 
 .resume{
-    background-color: #00008B !important;
+    background-color: DodgerBlue !important;
     border-color:  #00008B !important;
-    color: DodgerBlue !important;
+    color:  #00008B !important;
     text-decoration: none !important;
 
     border: 1px solid;
@@ -65,9 +65,9 @@
 }
 
 .code-button{
-    background-color: #f5f0ff !important;
-    border-color: #6f42c1 !important;
-    color:#6f42c1 !important;
+    background-color: DodgerBlue !important;
+    border-color:  #00008B !important;
+    color:  #00008B !important;
     text-decoration: none !important;
 
     border: 1px solid;
