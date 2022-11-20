@@ -35,11 +35,6 @@
 
 }
 
-
-.header-text{
-    padding-top: 120px;
-}
-
 code > p {
     line-height: 0.9rem;
     margin: 0;
@@ -53,74 +48,39 @@ code > p {
     padding: 10px !important;
 }
 
-.python-circle {
+.circle {
+    position: relative;
+    top: 2px;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
 
-
+.python {
     background: #3572A5;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
 
-.js-circle {
-
-
+.js {
     background: #f1e05a;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
 
-.c-circle {
-
-
+.c {
     background: #dad8d8;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
-.react-circle {
 
-
+.react {
     background: #b07219;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
-.css-circle {
 
-
+.css {
     background: #563d7c;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
-.html-circle {
 
-
+.html {
     background: #e34c26;
-    position: relative;
-    top: 2px;
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
 }
+
 .card{
     margin-bottom: 10px !important;
 }
@@ -137,20 +97,6 @@ code > p {
     margin:10px;
 }
 
-
-/*// Small devices (landscape phones, 576px and up)*/
-/*@media (min-width: 576px) { ... }*/
-
-/*// Medium devices (tablets, 768px and up)*/
-/*@media (min-width: 768px) { ... }*/
-
-/*// Large devices (desktops, 992px and up)*/
-/*@media (min-width: 992px) { ... }*/
-
-/*// Extra large devices (large desktops, 1200px and up)*/
-/*@media (min-width: 1200px) { ... }*/
-
-/*// Extra small devices (portrait phones, less than 576px)*/
 
 
 /*// Small devices (landscape phones, less than 768px)*/
@@ -258,4 +204,29 @@ input:checked + .slider:before {
     top:100px;
     float:right;
     margin-top:10px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.logo {
+    width: 150px;
+    height: 150px;
+}
+
+.carousel {
+    height: 75em;
+    width: 100%;
+}
+
+.carousel-inner {
+    height: 100%;
+}
+
+.carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
