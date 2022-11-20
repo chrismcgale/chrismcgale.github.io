@@ -217,7 +217,7 @@ input:checked + .slider:before {
 }
 
 .carousel {
-    height: 75em;
+    height: 60em;
     width: 100%;
 }
 
