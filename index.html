@@ -19,7 +19,7 @@
             padding-bottom: 50px;
         }
         .carousel-image {
-            max-width: 100%;
+            width: 350px;
             height: 350px;
             display: block;
             margin: 0 auto; /* centers the image if it's smaller than the container */
@@ -33,18 +33,21 @@
             background: transparent; /* Ensure there's no background */
             color: black !important;
         }
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(1);  /* This will change white to black for the SVG icons */
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-5">
 
-        <!-- Display Name Prominently at the Top -->
-        <h1 class="name-header">Chris McGale</h1>
-
         <!-- School Logos -->
         <div class="d-flex justify-content-around mb-5">
             <img src="\img\UWLOGO.png" alt="UW Logo" width="150">
+            <!-- Display Name Prominently at the Top -->
+            <h1 class="name-header">Chris McGale</h1>
             <img src="\img\WLULOGO.png" alt="WLU Logo" width="150">
         </div>
 
@@ -68,7 +71,7 @@
             <div class="carousel-inner">
 
                 <div class="carousel-item active">
-                    <img src="\img\spam.png" class="d-block w-100 carousel-image">
+                    <img src="\img\spam.png" class="d-block carousel-image">
                     <div class="carousel-caption">
                         <h5>Spam Detect</h5>
                         <p>ML spam website classifier</p>
@@ -76,10 +79,18 @@
                 </div>
 
                 <div class="carousel-item">
-                    <img src="\img\slash.jpg" class="d-block w-100 carousel-image">
+                    <img src="\img\slash.jpg" class="d-block carousel-image">
                     <div class="carousel-caption">
                         <h5>Guitar Tuner</h5>
-                        <p>ML spam website classifier</p>
+                        <p>HTML project hosted on firebase</p>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <img src="\img\goldchess.jpeg" class="d-block carousel-image">
+                    <div class="carousel-caption">
+                        <h5>Chess</h5>
+                        <p>OOP C++ implementation</p>
                     </div>
                 </div>
 
@@ -102,7 +113,7 @@
             <div class="card text-center know-more" >
                 <div class="card-body">
                     <h3 class="card-title white-out">Want to know more?</h3>
-                    <div  class="icons white-out">
+                    <div class="icons white-out">
                         <a target="_blank" href="https://www.linkedin.com/in/chris-mcgale-860a2b185/">
                             <svg  xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                         </a>
