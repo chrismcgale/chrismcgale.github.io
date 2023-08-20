@@ -1,269 +1,130 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link type="text/css" rel="stylesheet" href="css/general.css" >
-    <link type="text/css" rel="stylesheet" media="" href="css/light_mode.css" id="light" >
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
 
-    <link type="text/css" rel="stylesheet "media="none"href="css/dark_mode.css" id="dark" >
-
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Christopher McGale</title>
+    <!-- Link to Bootstrap CSS for styling and carousel -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .name-header {
+            font-size: 3em;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+        .carousel-padding {
+            padding-bottom: 50px;
+        }
+        .carousel-image {
+            max-width: 100%;
+            height: 350px;
+            display: block;
+            margin: 0 auto; /* centers the image if it's smaller than the container */
+        }
+        .carousel-inner {
+            height: 450px;
+        }
+        .carousel-caption {
+            top: auto;
+            bottom: auto;
+            background: transparent; /* Ensure there's no background */
+            color: black !important;
+        }
+    </style>
 </head>
+
 <body>
-<div class="light toggle">
-    <label class="switch">
-        <input type="checkbox" onclick="changeCSS(this)">
-        <span class="slider round"></span>
-    </label>
+    <div class="container mt-5">
 
-</div>
+        <!-- Display Name Prominently at the Top -->
+        <h1 class="name-header">Chris McGale</h1>
 
-
-
-<div class="container header">
-    <div class="col-sm header-text ">
-        <h1>Christopher McGale</h1>
-        <div>
-            <span>Fifth year at University of Waterloo and Wilfrid Laurier University <br /> </span>
-            <span>Majors in Computer Science (UW) and Business Administration (WLU)</span>
-
+        <!-- School Logos -->
+        <div class="d-flex justify-content-around mb-5">
+            <img src="\img\UWLOGO.png" alt="UW Logo" width="150">
+            <img src="\img\WLULOGO.png" alt="WLU Logo" width="150">
         </div>
 
-        <div style="margin-top: 10px">
-            <a target="_blank" href="chris_web.pdf" class="resume">Resume</a>
+        <div class="description-section mt-5">
+            <h2>About Me</h2>
+            <p>
+                Hello! I'm Chris, a recent graduate from the University of Waterloo and Wilfrid Laurier University. 
+                I have a passion for building scalable systems, and I've worked on several projects 
+                that showcase my skills. In my free time, I enjoy reading, walking my dog and staying fit. 
+                Feel free to browse my projects below or download my resume for a comprehensive view of my qualifications.
+            </p>
         </div>
 
-    </div>
-
-
-    <div class="school-logos">
-        <img class="logo" src="img/UWLOGO.png">
-
-        <img class="logo" src="img/WLULOGO.png">
-    </div>
-
-</div>
-
-<div class="page-break"></div>
-
-<div class="container info-container">
-    <hr>
-    <div class="row">
-        <div class="col-sm col-md-4">
-            <div style="margin-bottom: 10px">
-                <h3 class="white-out">
-                    Projects
-                </h3>
-                <p class="white-out">If you want to see some of my public projects check out my github below</p>
-                <a target="_blank" href="https://github.com/chrismcgale?tab=repositories" class="code-button">Github</a>
-                <br></br>
-                <p class="white-out">Or if you'd like to see some of my school projects see the link below (please contact for password)</p>
-                <a target="_blank" href="https://murmuring-fortress-24603.herokuapp.com" class="code-button">Private</a>
-            </div>
-
-
+        <!-- Download Resume Button -->
+        <div class="text-center mb-5">
+            <a href="Chris McGale Resume.pdf" download class="btn btn-primary">Download My Resume</a>
         </div>
-        <div class="col-sm col-md-4">
-            <div class="card" >
-                <img class="card-img-top" src="img/buffet.jpeg" alt="Card image cap">
-                <div class="card-body">
-                    <div style="font-size: 18px" class="white-out">Finance Web Scrape</div>
-                    <div class="row">
-                        <div class="col">
-                            <div><div class="js circle"></div><span class="language-bubble"> node.js</span>
-                                <div class="html circle"></div><span class="language-bubble"> HTML/CSS</span>
-                                <div class="python circle"></div><span class="language-bubble"> Python</span>
-                            </div>
 
-                        </div>
-                        <div class="col"> <a target="_blank" href="https://github.com/chrismcgale/Finance-scrape" class="code-button">See Code</a></div>
+        <!-- Projects Carousel -->
+        <div id="projectsCarousel" class="carousel slide carousel-padding" data-ride="carousel" data-interval="4000">
+            <div class="carousel-inner">
+
+                <div class="carousel-item active">
+                    <img src="\img\spam.png" class="d-block w-100 carousel-image">
+                    <div class="carousel-caption">
+                        <h5>Spam Detect</h5>
+                        <p>ML spam website classifier</p>
                     </div>
                 </div>
+
+                <div class="carousel-item">
+                    <img src="\img\slash.jpg" class="d-block w-100 carousel-image">
+                    <div class="carousel-caption">
+                        <h5>Guitar Tuner</h5>
+                        <p>ML spam website classifier</p>
+                    </div>
+                </div>
+
             </div>
+
+            <!-- Carousel Controls -->
+            <a class="carousel-control-prev" href="#projectsCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#projectsCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+
         </div>
 
 
-        <div class="col-sm col-md-4">
-            <div class="card" >
-                <img class="card-img-top" src="img/snake.png" alt="Card image cap">
+        <div class="container">
+            <div class="card text-center know-more" >
                 <div class="card-body">
-                    <div style="font-size: 18px" class="white-out">Snake</div>
-                    <div class="row">
-                        <div class="col"> <div><div class="js circle"></div><span class="language-bubble"> JS</span>
-                            <div class="html circle"></div><span class="language-bubble"> HTML/CSS</span>
-                        </div>
-                        </div>
-                        <div class="col"> <a target="_blank" href="https://github.com/chrismcgale/snake" class="code-button">See Code</a></div>
+                    <h3 class="card-title white-out">Want to know more?</h3>
+                    <div  class="icons white-out">
+                        <a target="_blank" href="https://www.linkedin.com/in/chris-mcgale-860a2b185/">
+                            <svg  xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a target="_blank" href="mailto: chrismcgale@gmail.com">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M12 12.713l-11.985-9.713h23.97l-11.985 9.713zm0 2.574l-12-9.725v15.438h24v-15.438l-12 9.725z"/></svg>
+                        </a>
+                        <a target="_blank" href="https://github.com/chrismcgale">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-4.466 19.59c-.405.078-.534-.171-.534-.384v-2.195c0-.747-.262-1.233-.55-1.481 1.782-.198 3.654-.875 3.654-3.947 0-.874-.312-1.588-.823-2.147.082-.202.356-1.016-.079-2.117 0 0-.671-.215-2.198.82-.64-.18-1.324-.267-2.004-.271-.68.003-1.364.091-2.003.269-1.528-1.035-2.2-.82-2.2-.82-.434 1.102-.16 1.915-.077 2.118-.512.56-.824 1.273-.824 2.147 0 3.064 1.867 3.751 3.645 3.954-.229.2-.436.552-.508 1.07-.457.204-1.614.557-2.328-.666 0 0-.423-.768-1.227-.825 0 0-.78-.01-.055.487 0 0 .525.246.889 1.17 0 0 .463 1.428 2.688.944v1.489c0 .211-.129.459-.528.385-3.18-1.057-5.472-4.056-5.472-7.59 0-4.419 3.582-8 8-8s8 3.581 8 8c0 3.533-2.289 6.531-5.466 7.59z"/></svg>
+                        </a>
                     </div>
+                    <a target="_blank" href="Chris McGale Resume.pdf" class="resume">Resume</a>
+        
                 </div>
             </div>
-        </div>
-        <div class="col-sm col-md-4">
-            <div class="card">
-                <img class="card-img-top" src="img/goldchess.jpeg" alt="Card image cap">
-                <div class="card-body">
-                    <div style="font-size: 18px" class="white-out">Chess - Private</div>
-                    <div class="row">
-                        <div class="col"> <div><div class="c circle"></div><span class="language-bubble"> C++</span></div></div>
-                        <div class="col"> <a target="_blank" href="https://murmuring-fortress-24603.herokuapp.com" class="code-button">See Code</a></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm col-md-4">
-            <div class="card" >
-                <img class="card-img-top" src="img/huff.png" alt="Card image cap">
-                <div class="card-body">
-                    <div style="font-size: 18px" class="white-out">Huffman Encoding - Private</div>
-                    <div class="row">
-                        <div class="col"> <div><div class="c circle"></div><span class="language-bubble"> C++</span></div></div>
-                        <div class="col"> <a target="_blank" href="https://murmuring-fortress-24603.herokuapp.com" class="code-button">See Code</a></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm col-md-4">
-            <div class="card" >
-                <img class="card-img-top" src="img/house.jpeg" alt="Card image cap">
-                <div class="card-body">
-                    <div style="font-size: 18px" class="white-out">AI Real Estate Predictor</div>
-                    <div class="row">
-                     
-                        <div class="col"> 
-                            <div><div class="js circle"></div><span class="language-bubble"> JS</span>
-                            <div class="python circle"></div><span class="language-bubble"> Python</span>
-                            <div class="react circle"></div><span class="language-bubble"> React</span>
-                        </div>
-                    </div>
-                        <div class="col"> <a target="_blank" href="https://ai-real-estate-valuator.herokuapp.com/" class="code-button"> Go To</a></div>
-                    </div>
-                </div>
-            </div>
+        
         </div>
     </div>
 
-</div>
-
-<div class="page-break"></div>
-
-<div class="container info-container">
-    <h2 class="white-out">My Motivators</h2>
-</div>
-
-<div class="container info-container">
-
-    <div id="myCarousel" class="carousel slide" data-ride="carousel">
-        <!-- Indicators -->
-        <ol class="carousel-indicators">
-            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-            <li data-target="#myCarousel" data-slide-to="1"></li>
-            <li data-target="#myCarousel" data-slide-to="2"></li>
-        </ol>
-
-        <!-- Wrapper for slides -->
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img class="carousel-img" src="img/family_photo.jpeg" alt="My one good photo">
-            </div>
-
-            <div class="carousel-item">
-                <img class="carousel-img" src="img/belt_promo.JPG" alt="Belt Promotion">
-                <div class="carousel-caption">
-                    <h3>Blue belt promotion</h3>
-                </div>
-            </div>
-
-            <div class="carousel-item">
-                <img class="carousel-img" src="img/group_img.jpg" alt="Out with friends">
-            </div>
-        </div>
-
-        <!-- Left and right controls -->
-        <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-            <span class="glyphicon glyphicon-chevron-left"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="right carousel-control" href="#myCarousel" data-slide="next">
-            <span class="glyphicon glyphicon-chevron-right"></span>
-            <span class="sr-only">Next</span>
-        </a>
-
-    </div>
-
-</div>
-
-<div class="page-break"></div>
-
-
-<div class="container">
-    <div class="card text-center know-more" >
-        <div class="card-body">
-            <h3 class="card-title white-out">Want to know more?</h3>
-            <div  class="icons white-out">
-                <a target="_blank" href="https://www.linkedin.com/in/chris-mcgale-860a2b185/">
-                    <svg  xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                </a>
-                <a target="_blank" href="mailto: chrismcgale@gmail.com">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M12 12.713l-11.985-9.713h23.97l-11.985 9.713zm0 2.574l-12-9.725v15.438h24v-15.438l-12 9.725z"/></svg>
-                </a>
-                <a target="_blank" href="https://github.com/chrismcgale">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-4.466 19.59c-.405.078-.534-.171-.534-.384v-2.195c0-.747-.262-1.233-.55-1.481 1.782-.198 3.654-.875 3.654-3.947 0-.874-.312-1.588-.823-2.147.082-.202.356-1.016-.079-2.117 0 0-.671-.215-2.198.82-.64-.18-1.324-.267-2.004-.271-.68.003-1.364.091-2.003.269-1.528-1.035-2.2-.82-2.2-.82-.434 1.102-.16 1.915-.077 2.118-.512.56-.824 1.273-.824 2.147 0 3.064 1.867 3.751 3.645 3.954-.229.2-.436.552-.508 1.07-.457.204-1.614.557-2.328-.666 0 0-.423-.768-1.227-.825 0 0-.78-.01-.055.487 0 0 .525.246.889 1.17 0 0 .463 1.428 2.688.944v1.489c0 .211-.129.459-.528.385-3.18-1.057-5.472-4.056-5.472-7.59 0-4.419 3.582-8 8-8s8 3.581 8 8c0 3.533-2.289 6.531-5.466 7.59z"/></svg>
-                </a>
-            </div>
-            <a target="_blank" href="chris_web.pdf" class="resume">Resume</a>
-
-        </div>
-    </div>
-
-</div>
-
-<script>
-
-  function enableStylesheet (node) {
-    let n = document.getElementById(node)
-    n.media = ''
-
-  }
-
-  function disableStylesheet (node) {
-    let n = document.getElementById(node)
-    n.media = 'none'
-  }
-
-  function changeCSS(cssFile) {
-    if (cssFile.checked){
-      enableStylesheet('dark')
-      disableStylesheet('light')
-    }else{
-      enableStylesheet('light')
-      disableStylesheet('dark')
-    }
-
-
-    console.log(cssFile.checked)
-  }
-</script>
-
-
-
-
-
-
-
-
-
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <!-- Include necessary scripts for Bootstrap's JS components -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
