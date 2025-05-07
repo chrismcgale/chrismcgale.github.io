@@ -380,19 +380,19 @@ section {
 }
 
 @keyframes glitch-1 {
-    0%, 100% { clip-path: inset(50% 0 30% 0); }
-    20% { clip-path: inset(20% 0 60% 0); }
-    40% { clip-path: inset(40% 0 40% 0); }
-    60% { clip-path: inset(80% 0 5% 0); }
-    80% { clip-path: inset(10% 0 85% 0); }
+    0%, 100% { clip-path: inset(20% 0 20% 0); }
+    20% { clip-path: inset(10% 0 40% 0); }
+    40% { clip-path: inset(25% 0 25% 0); }
+    60% { clip-path: inset(40% 0 5% 0); }
+    80% { clip-path: inset(5% 0 45% 0); }
 }
 
 @keyframes glitch-2 {
-    0%, 100% { clip-path: inset(20% 0 60% 0); }
-    20% { clip-path: inset(40% 0 30% 0); }
-    40% { clip-path: inset(60% 0 20% 0); }
-    60% { clip-path: inset(10% 0 70% 0); }
-    80% { clip-path: inset(30% 0 50% 0); }
+    0%, 100% { clip-path: inset(10% 0 30% 0); }
+    20% { clip-path: inset(20% 0 20% 0); }
+    40% { clip-path: inset(30% 0 10% 0); }
+    60% { clip-path: inset(5% 0 35% 0); }
+    80% { clip-path: inset(15% 0 25% 0); }
 }
 
 /* About Section */
@@ -1070,6 +1070,19 @@ header {
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
 }
 
+/* Add this new section to fix the main content padding */
+main {
+    padding-top: 70px; /* Adjust this value based on your header height */
+}
+
+/* Alternatively, you could modify the hero section instead */
+.hero-section {
+    padding-top: 120px; /* Increased padding to account for fixed header */
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
 .nav-container {
     display: flex;
     justify-content: space-between;
@@ -1238,4 +1251,62 @@ nav ul li a:hover::after {
         gap: 1rem;
         text-align: center;
     }
+}
+
+.timeline-item::before {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-bg);
+    padding: 0.5rem 1rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+/* Change this to move year with the card */
+.timeline-item {
+    position: relative;
+    margin-bottom: 4rem;
+    padding-top: 2.5rem; /* Add padding to make room for the year badge */
+}
+
+/* Fix the scrollbar in project cards */
+.project-back p {
+    flex: 1;
+    overflow: auto;
+    /* Add these lines for custom scrollbar */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: var(--color-primary) rgba(0, 0, 0, 0.1); /* For Firefox */
+}
+
+/* For Webkit browsers (Chrome, Safari, newer Edge) */
+.project-back p::-webkit-scrollbar {
+    width: 5px;
+}
+
+.project-back p::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.project-back p::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+}
+
+/* Optional: Make project back slightly taller to fit content better */
+.project-front, .project-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    overflow: hidden; /* Ensure content doesn't overflow */
 }

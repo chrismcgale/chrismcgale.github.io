@@ -1,8 +1,6 @@
-console.log("TEST")
 // Function to initialize data flow visualization
 function initDataFlowVisualization() {
     const canvas = document.getElementById('dataflow-visualization');
-    console.log(canvas);
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
@@ -188,7 +186,6 @@ function initScrollAnimations() {
     document.head.appendChild(style);
 }
 
-console.log("TEST")
 
 // Set up the particle animation for data flow visualization
 initDataFlowVisualization();
