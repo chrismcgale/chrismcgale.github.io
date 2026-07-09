@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rook: custom STM32H743 flight controller · mcgale.dev</title>
+  <meta name="description" content="A from-scratch 4-layer STM32H743 flight controller for a 7-inch 6S quad: pin-compatible with Betaflight and ArduPilot, ICM-42688-P gyro on a dedicated low-noise LDO, reverse-polarity protected 6S power tree. Schematic generated as code; board routed, DRC-clean, pre-fab.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 03</p>
+
+  <div class="project-head">
+    <span class="card-index">03 / HARDWARE · CUSTOM FLIGHT CONTROLLER · ROUTED, PRE-FAB</span>
+    <h1>Rook</h1>
+    <p class="subtitle">
+      A flight controller of my own design: a 4-layer
+      <strong>STM32H743</strong> board for a 7-inch <strong>6S</strong> quad,
+      laid out pin-for-pin compatible with <strong>Betaflight</strong> and
+      <strong>ArduPilot</strong> so both stacks run on it nearly for free. The
+      whole schematic is generated from code; the board is routed and
+      DRC-clean, waiting on a fab order. Named for the corvid: a rook, the
+      bird that builds and remembers.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- X-quad top view → motor mixer → gyro attitude triad -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="60" x2="960" y2="60" stroke="var(--line-strong)" stroke-width="1"/>
+        <!-- quad X-frame -->
+        <path d="M120 20 L 220 92 M220 20 L 120 92" stroke="var(--ink-soft)" stroke-width="1.4"/>
+        <circle cx="120" cy="20" r="11" fill="none" stroke="var(--amber)" stroke-width="1.3"/>
+        <circle cx="220" cy="20" r="11" fill="none" stroke="var(--ink-soft)" stroke-width="1.3"/>
+        <circle cx="120" cy="92" r="11" fill="none" stroke="var(--ink-soft)" stroke-width="1.3"/>
+        <circle cx="220" cy="92" r="11" fill="none" stroke="var(--amber)" stroke-width="1.3"/>
+        <rect x="158" y="48" width="24" height="24" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <!-- mixer taps -->
+        <path d="M250 56 L 360 56 M250 64 L 360 64 M250 40 L 360 40 M250 80 L 360 80" stroke="var(--ink-soft)" stroke-width="0.9" stroke-dasharray="3 3"/>
+        <text x="300" y="24" font-size="10" fill="var(--ink-faint)" font-family="monospace">DShot</text>
+        <rect x="360" y="34" width="16" height="52" fill="none" stroke="var(--line-strong)" stroke-width="1"/>
+        <!-- setpoint / gyro track waveform -->
+        <path d="M400 60 C 470 60, 470 30, 540 30 S 620 78, 700 60 S 800 48, 900 58" stroke="var(--amber)" stroke-width="1.4"/>
+        <path d="M400 60 C 470 60, 470 34, 540 34 S 620 72, 700 60 S 800 52, 900 60" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="4 3"/>
+        <!-- attitude triad -->
+        <circle cx="880" cy="30" r="18" fill="none" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M880 30 L 900 22 M880 30 L 866 16 M880 30 L 880 52" stroke="var(--amber)" stroke-width="1.2"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Schematic + layout frozen · routed · DRC-clean · not yet ordered</dd></div>
+      <div><dt>MCU</dt><dd>STM32H743VIT6 · LQFP-100 · 480 MHz Cortex-M7</dd></div>
+      <div><dt>IMU / baro</dt><dd>ICM-42688-P 6-axis (SPI1) · DPS310 barometer (I2C2)</dd></div>
+      <div><dt>Power</dt><dd>6S in · reverse-poly P-FET + SMAJ33A TVS · TPS54360B 5&nbsp;V buck · dual 3.3&nbsp;V LDO</dd></div>
+      <div><dt>Logging</dt><dd>microSD on SDMMC1 (4-bit)</dd></div>
+      <div><dt>Stackup</dt><dd>4-layer 1.6&nbsp;mm · sig / GND / PWR / sig · JLCPCB ENIG</dd></div>
+      <div><dt>Outline</dt><dd>36×36&nbsp;mm · 30.5×30.5 M3 mount</dd></div>
+      <div><dt>Compatibility</dt><dd>MatekH743 hwdef pin map (Betaflight + ArduPilot)</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <figure class="fig">
+      <img src="../assets/img/rook-pcb-iso.png" alt="Isometric KiCad 3D render of the Rook flight controller: LQFP-100 STM32H743 centered, USB-C on the right edge, JST-SH connectors on the left, a large bulk electrolytic and the RK V1 silkscreen" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>Rook, KiCad 3D render. LQFP-100 H743 dead center, USB-C on the right edge, JST-SH connectors (ESC / RX / GPS / VTX) down the left, 6S input stage bottom-right.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">1.</span>Why build the flight controller</h2>
+    <p>
+      Every other flying project here has run on someone else's flight
+      controller. Rook is the one I designed myself, from the power tree up.
+      The constraint that shapes the whole board: it is laid out
+      <strong>pin-for-pin against the ArduPilot MatekH743 hwdef</strong>.
+      Cloning that pin map means the board inherits working
+      <strong>Betaflight</strong> and <strong>ArduPilot</strong> targets almost
+      for free, so I can bring up custom firmware against two golden references
+      instead of debugging a board and an estimator at the same time.
+    </p>
+    <p>
+      This one is deliberately hand-built, not automated. The split I set for
+      myself: the mechanical and generative infrastructure (layer stackup,
+      board outline, net classes, the schematic generator, fab tooling) is
+      scripted and repeatable; the parts that actually teach board design
+      (footprint verification, component placement, routing, the ground and
+      power pours, and the dozen judgment calls the datasheets don't settle)
+      are done by hand. The pin map is the fixed contract; everything else is
+      where the learning is.
+    </p>
+
+    <h2><span class="sec-no">2.</span>The board</h2>
+    <p>
+      It is a 36×36&nbsp;mm four-layer stack on a standard 30.5×30.5 M3
+      mounting pattern, so it drops onto an off-the-shelf 30.5 ESC. The layer
+      intent is fixed: <strong>L1 signal · L2 solid ground plane · L3 power ·
+      L4 signal.</strong> The interior ground plane is not optional here: the
+      ICM-42688-P needs a quiet ground reference while DShot motor outputs and
+      a switching BEC share the same small board. Fab target is JLCPCB 4-layer
+      ENIG, chosen for the flat pads the 0.5&nbsp;mm-pitch LQFP-100 and the LGA
+      gyro want.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/rook-pcb-top.png" alt="Top-down KiCad render of the Rook PCB showing the MCU, USB-C, 8 MHz crystal, and connectors" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>Top side: the H743, its 8&nbsp;MHz crystal, USB-C (DFU + VCP), and the JST-SH connector bank. Signal routing on L1 over the L2 ground plane.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/rook-pcb-bottom.png" alt="Bottom-side KiCad render of the Rook PCB carrying the power stage, microSD socket, and SWD pads" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Bottom side: the working half. Reverse-polarity P-FET and TVS, the TPS54360B buck with its inductor, dual 3.3&nbsp;V LDOs, the microSD socket (SDMMC1), BOOT0 button, and the SWD test pads.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">3.</span>The 6S power tree</h2>
+    <p>
+      6S is where cheap flight controllers die: an inductive spike off a 25&nbsp;V
+      pack on a hot-plug easily overshoots past 50&nbsp;V. Rook's input stage is
+      built for it and is the one robustness item I kept even on a personal
+      board:
+    </p>
+    <ul>
+      <li>
+        <strong>Reverse-polarity P-FET</strong> (Si7461DP, 12&nbsp;V gate clamp)
+        plus an <strong>SMAJ33A TVS</strong> on the raw battery node. A
+        backwards battery does nothing; the worst hot-plug ring clamps below
+        53&nbsp;V, under the 60&nbsp;V rating of the FET and buck, with margin.
+      </li>
+      <li>
+        <strong>5&nbsp;V</strong> from a <strong>TPS54360B</strong> 60&nbsp;V / 3.5&nbsp;A
+        buck (10&nbsp;µH, SS56 catch diode): a BEC rated well above the 6S spike
+        envelope, not a 24-32&nbsp;V part that a spike would kill.
+      </li>
+      <li>
+        <strong>3.3&nbsp;V for the MCU</strong> from an AMS1117 LDO off the 5&nbsp;V
+        rail, kept separate from the gyro's supply.
+      </li>
+      <li>
+        <strong>3.3&nbsp;V for the gyro</strong> from its own dedicated low-noise
+        <strong>TPS7A2033</strong> LDO powering the IMU and nothing else: the
+        gyro's noise floor is a PSRR problem, so it gets its own clean rail and
+        tight decoupling, placed on the opposite side of the board from the
+        power stage and connectors.
+      </li>
+    </ul>
+
+    <h2><span class="sec-no">4.</span>Schematic as code</h2>
+    <p>
+      The schematic is not drawn by hand: it is generated. A Python script
+      (<code>gen.py</code>) is the source of truth. It emits the KiCad
+      schematic deterministically, each pin fanned out to a named global
+      label, nets joined by name, power nets flagged. The MCU is keyed by pin
+      name against the hwdef map, never hand-numbered, so a transcription slip
+      can't silently reassign a pin. Re-running it is idempotent: a no-op
+      regeneration produces a zero-line git diff, which makes the schematic a
+      real review surface instead of an opaque binary.
+    </p>
+    <p>
+      The generated core (MCU pin map, gyro / baro / gyro-LDO, USB ESD and
+      USB-C, and the per-subsystem support passives) lands at
+      <strong>zero ERC errors</strong>. The board that comes out of it is
+      <strong>89 components across 109 nets</strong>, routed on four layers and
+      <strong>DRC-clean with full schematic parity</strong> (0 violations,
+      0 unconnected, 0 parity issues on the current spin).
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/rook-schematic.png" alt="Overview of the Rook schematic sheet, sectioned into labeled sub-circuit blocks: MCU, power protection, buck, gyro, barometer, USB, and connectors" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>Generated schematic, sectioned into wired sub-circuits: the H743 pin map, the 6S protection and buck stage, gyro and barometer, USB-C with ESD, and the connector bank. Full sheet: <a href="../assets/docs/rook-schematic.pdf">schematic PDF ↗</a> · <a href="../assets/docs/rook.net">netlist ↗</a>.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">5.</span>Invariants the checklist can't catch</h2>
+    <p>
+      A lot of what makes a flight controller work (or brick) is invisible to
+      DRC. The design carries a short list of non-negotiables, each with a
+      reason a rule check would miss:
+    </p>
+    <ul>
+      <li>
+        <strong>RC input stays on USART6</strong> (PC6/PC7), deliberately clear
+        of the H74x DFU-bootloader UART pins, so a powered receiver or GPS
+        can't hijack the board into the bootloader.
+      </li>
+      <li>
+        <strong>VCAP1 + VCAP2</strong>: two 2.2&nbsp;µF low-ESR caps tied together
+        for the H743's internal LDO. Leave them off and the chip simply won't
+        boot: a failure no schematic rule flags.
+      </li>
+      <li>
+        <strong>ICM-42688-P RESV pins</strong>: some are datasheet "connect to
+        GND", not "no-connect". A floating reserved pin is a flaky-or-bricked
+        gyro that DRC will happily pass.
+      </li>
+      <li>
+        <strong>SPI1 MOSI is on PD7</strong>, not a PA/PB pin: a non-obvious
+        assignment straight out of the hwdef, easy to "correct" and break.
+      </li>
+      <li>
+        <strong>microSD logging on SDMMC1</strong> (not SPI flash): the
+        ArduPilot-native path, brought out on a real 4-bit bus.
+      </li>
+    </ul>
+
+    <h2><span class="sec-no">6.</span>Status &amp; what's next</h2>
+    <p>
+      Honest status: the schematic and layout are frozen, the board is fully
+      routed, and it passes DRC with schematic parity. It has <em>not</em> been
+      ordered, populated, or flown. The near-term path is a footprint
+      verification pass against every datasheet, then a first fab and assembly
+      run, bring-up over SWD and USB DFU, and a Betaflight target as the first
+      firmware milestone before any of my own control code goes near it. Phase
+      two is a separate board: a DIY AM32 4-in-1 ESC to fly underneath it.
+    </p>
+    <p>
+      Downloads: <a href="../assets/docs/rook-schematic.pdf">schematic (PDF) ↗</a>
+      · <a href="../assets/docs/rook.net">netlist (.net) ↗</a>.
+    </p>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="rinnegan.html">← 02 · Rinnegan</a>
+    <a href="drone-gate-navigation.html">04 · Gate navigation →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

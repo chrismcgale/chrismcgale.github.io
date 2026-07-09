@@ -1,481 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chris McGale | Data Engineer</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chris McGale · robotics, state estimation, embedded hardware</title>
+  <meta name="description" content="Portfolio of Chris McGale: multi-agent visual-inertial odometry, an AR-linked ESP32 submarine, autonomous drones, and custom hardware built end-to-end.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="main.js"></script>
 </head>
 <body>
-    <div class="stars-container">
-        <div id="stars"></div>
-        <div id="stars2"></div>
-        <div id="stars3"></div>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="#projects">projects</a>
+      <a href="#coursework">coursework</a>
+      <a href="#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Chris McGale</h1>
+    <p class="role">robotics · state estimation · embedded hardware</p>
+    <p class="bio">
+      I build robotic systems end-to-end: from the PCB up through firmware,
+      perception, and factor-graph estimation. Current center of gravity:
+      multi-agent visual-inertial odometry on CUDA. Everything below was
+      designed, built, and debugged at my own bench.
+    </p>
+  </section>
+
+  <div class="divider" aria-hidden="true">
+    <svg viewBox="0 0 960 18" preserveAspectRatio="none" fill="none">
+      <path d="M0 12 C 120 12, 160 4, 280 6 S 520 14, 640 9 S 880 4, 960 8" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+      <circle cx="120" cy="9.5" r="3" fill="var(--amber)"/>
+      <circle cx="400" cy="10" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+      <circle cx="640" cy="9" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+      <ellipse cx="850" cy="6.5" rx="9" ry="4" fill="none" stroke="var(--amber)" stroke-width="1" transform="rotate(-8 850 6.5)"/>
+    </svg>
+  </div>
+
+  <section class="section" id="projects">
+    <div class="section-head">
+      <h2>Projects</h2>
+      <svg class="rule" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true" fill="none">
+        <line x1="0" y1="7" x2="200" y2="7" stroke="var(--line-strong)" stroke-width="1"/>
+        <circle cx="60" cy="7" r="2.5" fill="var(--amber)"/>
+        <circle cx="120" cy="7" r="2.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+        <rect x="166" y="3" width="8" height="8" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+      </svg>
+      <span class="count">08 entries</span>
     </div>
 
-    <div class="grid-overlay"></div>
+    <div class="card-grid">
 
-    <header>
-        <div class="nav-container">
-            <div class="logo">CM</div>
-            <nav>
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#employment">Employment</a></li>
-                    <li><a href="#education">Education</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#contact" class="contact-button">Contact</a></li>
-                </ul>
-            </nav>
+      <a class="card card--feature" href="projects/submersivity.html">
+        <div class="card-body">
+          <span class="card-index">01 / FLAGSHIP · PUBLISHED · IEEE ICMA</span>
+          <h3>Submersivity: submarine → AI → AR pipeline</h3>
+          <p>
+            An ESP-DIVE-based ESP32-S3 submersible with a 3D-printed hull surveys
+            Peter Street Basin; fine-tuned YOLOv8s flags garbage (mAP50 0.883),
+            COLMAP + ArUco place every detection in a mapped model of the basin,
+            and Vuzix Smart Swim XR goggles guide the cleanup diver to the nearest
+            target. Built in Steve Mann's lab.
+          </p>
+          <div class="card-tags">
+            <span class="tag tag--status">PUBLISHED</span>
+            <span class="tag">ESP32</span>
+            <span class="tag">YOLOv8</span>
+            <span class="tag">ArUco</span>
+            <span class="tag">COLMAP</span>
+            <span class="tag">Vuzix AR</span>
+          </div>
         </div>
-    </header>
-
-    <main>
-        <!-- Hero Section -->
-        <section id="hero" class="hero-section">
-            <div class="container">
-                <div class="hero-content">
-                    <h1 class="glitch" data-text="Chris McGale">Chris McGale</h1>
-                    <div class="subtitle">Data Engineer | Parallel Computing Specialist</div>
-                    <div class="tagline">Transforming complex data into actionable insights</div>
-                    <div class="hero-cta">
-                        <a href="#projects" class="primary-button">View Projects</a>
-                        <a href="#contact" class="secondary-button">Get in Touch</a>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <canvas id="dataflow-visualization"></canvas>
-                </div>
-            </div>
-            <div class="scroll-indicator">
-                <div class="mouse"></div>
-                <div class="arrow-down"></div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="about-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>About<span class="accent">_</span></h2>
-                </div>
-                <div class="about-content">
-                    <div class="about-text">
-                        <p>University of Waterloo Computer Science graduate with a dual degree in Business Administration from Wilfrid Laurier University. Specialized in data engineering and parallel computing with expertise in PySpark, GPU optimization, and cloud infrastructure.</p>
-                        <p>Passionate about building high-performance data systems that handle massive datasets with minimal latency. Experienced in designing ML pipelines and optimizing computational workloads.</p>
-                    </div>
-                    <div class="skills-container">
-                        <div class="skills-header">Tech Stack</div>
-                        <div class="skills-orbit">
-                            <div class="orbit-core">Parallel Computing</div>
-                            <div class="orbit-path" id="orbit1">
-                                <div class="orbit-item">PySpark</div>
-                                <div class="orbit-item">CUDA</div>
-                                <div class="orbit-item">PyTorch</div>
-                                <div class="orbit-item">TensorFlow</div>
-                            </div>
-                            <div class="orbit-path" id="orbit2">
-                                <div class="orbit-item">Azure</div>
-                                <div class="orbit-item">Databricks</div>
-                                <div class="orbit-item">AWS</div>
-                                <div class="orbit-item">Kubernetes</div>
-                            </div>
-                            <div class="orbit-path" id="orbit3">
-                                <div class="orbit-item">Python</div>
-                                <div class="orbit-item">Rust</div>
-                                <div class="orbit-item">C++</div>
-                                <div class="orbit-item">Scala</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Employment Section -->
-        <section id="employment" class="employment-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Employment<span class="accent">_</span></h2>
-                </div>
-                <div class="timeline">
-                    <div class="timeline-item" data-year="2023-2025">
-                        <div class="timeline-content">
-                            <div class="job-title">Data Engineer</div>
-                            <div class="company">Scotiabank - Global Finance</div>
-                            <div class="job-details">
-                                <div class="tech-badges">
-                                    <span>PySpark</span>
-                                    <span>Databricks</span>
-                                    <span>Azure</span>
-                                    <span>PyTorch</span>
-                                    <span>TensorFlow</span>
-                                    <span>SQL</span>
-                                    <span>Git</span>
-                                </div>
-                                <div class="achievement">
-                                    <div class="metric">
-                                        <div class="metric-value">65%</div>
-                                        <div class="metric-label">Latency Reduction</div>
-                                    </div>
-                                    <div class="metric">
-                                        <div class="metric-value">$50B+</div>
-                                        <div class="metric-label">Transaction Volume</div>
-                                    </div>
-                                </div>
-                                <ul class="job-highlights">
-                                    <li>Architected high-performance balance sheet reconciliation system (Hyperion) processing 100GB+ daily</li>
-                                    <li>Deployed scalable ML pipelines with PyTorch and TensorFlow, reducing inference latency by 40%</li>
-                                    <li>Built financial performance measurement tools (MBR) for branch managers</li>
-                                    <li>Maintained retail credit risk tool with Microsoft SQL Server and Datadog monitoring</li>
-                                    <li>Introduced version control standards with Git and Bitbucket</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item" data-year="2021-2023">
-                        <div class="timeline-content">
-                            <div class="job-title">Fullstack Software Engineer</div>
-                            <div class="company">Cooperators</div>
-                            <div class="job-details">
-                                <div class="tech-badges">
-                                    <span>React</span>
-                                    <span>Node.js</span>
-                                    <span>MongoDB</span>
-                                    <span>Kafka</span>
-                                    <span>Docker</span>
-                                    <span>Kubernetes</span>
-                                    <span>AWS</span>
-                                </div>
-                                <div class="achievement">
-                                    <div class="metric">
-                                        <div class="metric-value">$50M+</div>
-                                        <div class="metric-label">Treaty Placements</div>
-                                    </div>
-                                    <div class="metric">
-                                        <div class="metric-value">87%</div>
-                                        <div class="metric-label">Processing Time Reduction</div>
-                                    </div>
-                                </div>
-                                <ul class="job-highlights">
-                                    <li>Architected reinsurance auction application handling $50M+ in placements annually</li>
-                                    <li>Launched and maintained Business Continuity Plan generating web app with React/Node</li>
-                                    <li>Developed robust logging and metrics analysis solution with Kafka</li>
-                                    <li>Leveraged Docker & Kubernetes for CI/CD and performance monitoring</li>
-                                    <li>Rigorously tested functionality & performance with Jest and Puppeteer</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item" data-year="2021">
-                        <div class="timeline-content">
-                            <div class="job-title">Embedded Engineer Intern</div>
-                            <div class="company">HUR Canada</div>
-                            <div class="job-details">
-                                <div class="tech-badges">
-                                    <span>C++</span>
-                                    <span>Assembly</span>
-                                    <span>PCB Testing</span>
-                                    <span>ATE</span>
-                                </div>
-                                <div class="achievement">
-                                    <div class="metric">
-                                        <div class="metric-value">37%</div>
-                                        <div class="metric-label">Defect Rate Reduction</div>
-                                    </div>
-                                    <div class="metric">
-                                        <div class="metric-value">98.7%</div>
-                                        <div class="metric-label">Production Yield</div>
-                                    </div>
-                                </div>
-                                <ul class="job-highlights">
-                                    <li>Designed OS level features for treadmills and stationary bikes</li>
-                                    <li>Conducted PCB testing for 20+ circuit board designs using automated test equipment</li>
-                                    <li>Communicated with clients to troubleshoot and resolve problems</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item" data-year="2020">
-                        <div class="timeline-content">
-                            <div class="job-title">Systems Analyst Intern</div>
-                            <div class="company">CPA Canada</div>
-                            <div class="job-details">
-                                <div class="tech-badges">
-                                    <span>Python</span>
-                                    <span>Bash</span>
-                                    <span>Data Analysis</span>
-                                </div>
-                                <div class="achievement">
-                                    <div class="metric">
-                                        <div class="metric-value">100s</div>
-                                        <div class="metric-label">Hours Saved</div>
-                                    </div>
-                                </div>
-                                <ul class="job-highlights">
-                                    <li>Reviewed integrity of financial information controls</li>
-                                    <li>Wrote Bash and Python scripts to automate data ingestion</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Education Section -->
-        <section id="education" class="education-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Education<span class="accent">_</span></h2>
-                </div>
-                <div class="education-content">
-                    <div class="education-card">
-                        <div class="education-logo">UW</div>
-                        <div class="education-details">
-                            <h3>Bachelor of Math in Computer Science</h3>
-                            <div class="education-institution">University of Waterloo</div>
-                            <div class="education-year">Aug 2023</div>
-                            <div class="education-courses">
-                                <div class="course-tag">Distributed Computing</div>
-                                <div class="course-tag">Network & System Security</div>
-                                <div class="course-tag">Randomized Algorithms</div>
-                                <div class="course-tag">Linear Algebra</div>
-                                <div class="course-tag">Statistics</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="education-card">
-                        <div class="education-logo">WLU</div>
-                        <div class="education-details">
-                            <h3>Bachelor of Business Administration</h3>
-                            <div class="education-institution">Wilfrid Laurier University</div>
-                            <div class="education-year">Aug 2023</div>
-                            <div class="education-courses">
-                                <div class="course-tag">Supply Chain Optimization</div>
-                                <div class="course-tag">Game Theory</div>
-                                <div class="course-tag">Economics</div>
-                                <div class="course-tag">Finance</div>
-                                <div class="course-tag">Risk Analysis</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="venn-diagram">
-                        <div class="venn-circle venn-cs">
-                            <h4>Computer Science</h4>
-                            <ul>
-                                <li>Algorithms</li>
-                                <li>Data Structures</li>
-                                <li>Systems Programming</li>
-                            </ul>
-                        </div>
-                        <div class="venn-overlap">
-                            <ul>
-                                <li>Data Analysis</li>
-                                <li>Optimization</li>
-                                <li>Decision Systems</li>
-                            </ul>
-                        </div>
-                        <div class="venn-circle venn-business">
-                            <h4>Business</h4>
-                            <ul>
-                                <li>Strategic Planning</li>
-                                <li>Financial Analysis</li>
-                                <li>Project Management</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="projects-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Projects<span class="accent">_</span></h2>
-                </div>
-                <div class="project-filters">
-                    <button class="filter-button active" data-filter="all">All</button>
-                    <button class="filter-button" data-filter="parallel">Parallel Computing</button>
-                    <button class="filter-button" data-filter="ml">Machine Learning</button>
-                    <button class="filter-button" data-filter="systems">Systems</button>
-                    <button class="filter-button" data-filter="web">Web & Cloud</button>
-                </div>
-                <div class="projects-grid">
-                    <div class="project-card" data-categories="parallel,ml">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>CNN Optimization with RustaCUDA</h3>
-                                <div class="project-tech">Rust, CUDA, Neural Networks</div>
-                                <div class="project-metric">50x Speed Increase</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Optimized multi-layer neural network through coalescing global memory accesses, tiling of reused data, and maximizing occupancy.</p>
-                                <div class="project-links">
-                                    <a href="#" class="project-link">View Details</a>
-                                    <a href="https://github.com" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="ml,parallel">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>Electrostatic Potential Map</h3>
-                                <div class="project-tech">C++, CUDA, Scientific Computing</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Recreated visual molecular dynamics (Humphrey et al, 1996) with a C++ CUDA Kernel using a gather approach, thread coarsening and a cutoff bin to calculate net forces.</p>
-                                <div class="project-links">
-                                    <a href="#" class="project-link">View Details</a>
-                                    <a href="https://github.com" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="web">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>InterviewMe.ca</h3>
-                                <div class="project-tech">MERN, OpenAI, AWS</div>
-                                <div class="project-metric">500+ MAU</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Solo built an interview prep tool with OpenAI Whisper and completion APIs. Generates unique questions, transcribes and assesses verbal responses. Built with MERN stack, hosted with Vercel and AWS EC2.</p>
-                                <div class="project-links">
-                                    <a href="https://interviewme.ca" class="project-link">Live Site</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="web,systems">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>SandBroker.xyz</h3>
-                                <div class="project-tech">MERN, Redis, InfluxDB</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Designed and built a MERN stack stock brokerage with real-time price updates using AlphaVantage API, cached with Redis for minimal API calls. Built time series databases with InfluxDB to store historical/portfolio data.</p>
-                                <div class="project-links">
-                                    <a href="https://sandbroker.xyz" class="project-link">Live Site</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="systems">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>OxideVPN</h3>
-                                <div class="project-tech">Rust, TCP/IP, Encryption</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Developed a VPN in Rust using TCP/IP protocol and AES-256-GCM encryption, featuring concurrent client handling, custom packet framing, and robust error recovery. Designed modular components for network routing, encryption, and session management.</p>
-                                <div class="project-links">
-                                    <a href="https://github.com/chrismcgale/Oxide_Vpn" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="web,ml">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>Uber Trend Detector</h3>
-                                <div class="project-tech">Scala, Spark Streaming</div>
-                                <div class="project-metric">500M+ Trips Analyzed</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Built a Scala Spark streaming pipeline to analyze over 500 Million trips to predict, in real time, rapid use changes in different geographic areas.</p>
-                                <div class="project-links">
-                                    <a href="#" class="project-link">View Details</a>
-                                    <a href="https://github.com" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="systems,hardware">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>Speculative Branch Predict</h3>
-                                <div class="project-tech">Verilog, FPGA, MIPS</div>
-                                <div class="project-metric">3x Speedup</div>
-                            </div>
-                            <div class="project-back">
-                                <p>FPGA design of a 5 stage MIPS processor in Verilog including full forwarding and speculative branch predictions resulting in a ~3x speedup on benchmarks. Simulated with Icarus.</p>
-                                <div class="project-links">
-                                    <a href="#" class="project-link">View Details</a>
-                                    <a href="https://github.com" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card" data-categories="systems,hardware">
-                        <div class="project-inner">
-                            <div class="project-front">
-                                <h3>GreenWatch</h3>
-                                <div class="project-tech">Raspberry Pi, ROS2, OpenCV</div>
-                            </div>
-                            <div class="project-back">
-                                <p>Engineered an autonomous differential drive robot powered by Raspberry Pi 5 running ROS2 on Ubuntu. Implemented real-time computer vision for object detection and plant health monitoring with OpenCV. Designed RabbitMQ pipeline with AWS S3 cloud storage.</p>
-                                <div class="project-links">
-                                    <a href="#" class="project-link">View Details</a>
-                                    <a href="https://github.com" class="project-link">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="projects-cta">
-                    <a href="https://github.com/chrismcgale" class="primary-button">View All on GitHub</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Contact<span class="accent">_</span></h2>
-                </div>
-                <div class="contact-content">
-                    <div class="contact-info">
-                        <p>Interested in working together? Send me a message and let's connect.</p>
-                        <div class="contact-methods">
-                            <a href="mailto:chrismcgale@gmail.com" class="contact-method">
-                                <div class="contact-icon">✉️</div>
-                                <div class="contact-detail">chrismcgale@gmail.com</div>
-                            </a>
-                            <a href="tel:+16475490630" class="contact-method">
-                                <div class="contact-icon">📱</div>
-                                <div class="contact-detail">+1 (647) 549-0630</div>
-                            </a>
-                            <a href="https://github.com" class="contact-method">
-                                <div class="contact-icon">💻</div>
-                                <div class="contact-detail">GitHub</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-copyright">© 2025 Chris McGale. All rights reserved.</div>
-                <div class="footer-links">
-                    <a href="https://github.com/chrismcgale">GitHub</a>
-                    <a href="https://www.linkedin.com/in/chris-mcgale/">LinkedIn</a>
-                </div>
-            </div>
+        <div class="card-motif" aria-hidden="true">
+          <!-- dive trajectory into a point-cloud basin -->
+          <svg viewBox="0 0 300 160" fill="none">
+            <path d="M10 30 C 80 30, 110 60, 140 95 S 220 135, 285 120" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="6 4"/>
+            <line x1="10" y1="22" x2="290" y2="22" stroke="var(--line-strong)" stroke-width="1"/>
+            <circle cx="140" cy="95" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
+            <path d="M140 95 L175 70 M140 95 L185 100 M140 95 L165 125" stroke="var(--ink-soft)" stroke-width="0.9"/>
+            <g fill="var(--ink-soft)">
+              <circle cx="210" cy="120" r="1.6"/><circle cx="224" cy="128" r="1.6"/>
+              <circle cx="238" cy="118" r="1.6"/><circle cx="250" cy="130" r="1.6"/>
+              <circle cx="262" cy="122" r="1.6"/><circle cx="230" cy="140" r="1.6"/>
+              <circle cx="248" cy="142" r="1.6"/><circle cx="264" cy="136" r="1.6"/>
+              <circle cx="218" cy="136" r="1.6"/><circle cx="256" cy="112" r="1.6"/>
+            </g>
+            <rect x="30" y="40" width="14" height="10" fill="none" stroke="var(--amber)" stroke-width="1.2"/>
+            <path d="M30 45 l14 0 M37 40 l0 10" stroke="var(--amber)" stroke-width="0.8"/>
+          </svg>
         </div>
-    </footer>
+      </a>
 
+      <a class="card card--feature" href="projects/rinnegan.html">
+        <div class="card-body">
+          <span class="card-index">02 / ACTIVE RESEARCH</span>
+          <h3>Rinnegan: GPS-denied cooperative perception</h3>
+          <p>
+            N agents run Kimera-VIO; inter-agent loop closures and robust
+            pose-graph optimization (GTSAM) estimate a shared frame peer-to-peer:
+            no GPS, no server. The product is relayed perception: a teammate's
+            detection rendered in your view, through walls, at 0.6&nbsp;px /
+            0.07&nbsp;m, with a CUDA TSDF HUD at 43&nbsp;FPS. Target: a 7-inch 6S
+            FPV quad.
+          </p>
+          <div class="card-tags">
+            <span class="tag tag--status">ACTIVE DEV</span>
+            <span class="tag">C++ / CUDA</span>
+            <span class="tag">Kimera-VIO</span>
+            <span class="tag">GTSAM</span>
+            <span class="tag">ROS 2</span>
+            <span class="tag">Isaac Sim</span>
+          </div>
+        </div>
+        <div class="card-motif" aria-hidden="true">
+          <!-- factor graph: variable circles, factor squares, covariance ellipse -->
+          <svg viewBox="0 0 300 160" fill="none">
+            <path d="M30 120 L90 70 L160 95 L230 45" stroke="var(--line-strong)" stroke-width="1.2"/>
+            <path d="M30 120 C 80 150, 180 140, 230 45" stroke="var(--amber)" stroke-width="1.2" stroke-dasharray="5 4"/>
+            <rect x="55" y="90" width="10" height="10" fill="var(--ink-soft)"/>
+            <rect x="120" y="77" width="10" height="10" fill="var(--ink-soft)"/>
+            <rect x="190" y="65" width="10" height="10" fill="var(--ink-soft)"/>
+            <circle cx="30" cy="120" r="10" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
+            <circle cx="90" cy="70" r="10" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
+            <circle cx="160" cy="95" r="10" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
+            <circle cx="230" cy="45" r="10" fill="var(--amber-wash)" stroke="var(--amber)" stroke-width="1.5"/>
+            <ellipse cx="230" cy="45" rx="26" ry="14" stroke="var(--amber)" stroke-width="1" transform="rotate(-18 230 45)"/>
+            <circle cx="268" cy="112" r="6" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+            <path d="M230 45 L268 112" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="3 3"/>
+          </svg>
+        </div>
+      </a>
+
+      <a class="card card--feature" href="projects/rook-flight-controller.html">
+        <div class="card-body">
+          <span class="card-index">03 / HARDWARE · CUSTOM FLIGHT CONTROLLER</span>
+          <h3>Rook: custom STM32H743 flight controller</h3>
+          <p>
+            A flight controller of my own design: a 4-layer STM32H743 board for
+            a 7-inch 6S quad, laid out pin-for-pin compatible with Betaflight
+            and ArduPilot so both stacks run on it nearly for free. Reverse-poly
+            protected 6S power tree, ICM-42688-P gyro on a dedicated low-noise
+            LDO, whole schematic generated from code. Board routed, DRC-clean,
+            pre-fab.
+          </p>
+          <div class="card-tags">
+            <span class="tag tag--status">ROUTED · PRE-FAB</span>
+            <span class="tag">STM32H743</span>
+            <span class="tag">ICM-42688-P</span>
+            <span class="tag">KiCad</span>
+            <span class="tag">Betaflight</span>
+            <span class="tag">ArduPilot</span>
+          </div>
+        </div>
+        <div class="card-motif" aria-hidden="true">
+          <!-- X-quad frame with motor mixer + attitude triad -->
+          <svg viewBox="0 0 300 160" fill="none">
+            <path d="M70 40 L 170 120 M170 40 L 70 120" stroke="var(--ink-soft)" stroke-width="1.4"/>
+            <circle cx="70" cy="40" r="13" fill="none" stroke="var(--amber)" stroke-width="1.4"/>
+            <circle cx="170" cy="40" r="13" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>
+            <circle cx="70" cy="120" r="13" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>
+            <circle cx="170" cy="120" r="13" fill="none" stroke="var(--amber)" stroke-width="1.4"/>
+            <rect x="106" y="66" width="28" height="28" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
+            <path d="M200 55 L 250 55 M200 80 L 250 80 M200 105 L 250 105" stroke="var(--ink-soft)" stroke-width="0.9" stroke-dasharray="3 3"/>
+            <circle cx="258" cy="55" r="4" fill="var(--amber)"/>
+            <circle cx="258" cy="80" r="4" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+            <circle cx="258" cy="105" r="4" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+            <circle cx="255" cy="135" r="16" fill="none" stroke="var(--line-strong)" stroke-width="1"/>
+            <path d="M255 135 L273 128 M255 135 L242 122 M255 135 L255 153" stroke="var(--amber)" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </a>
+
+      <a class="card" href="projects/drone-gate-navigation.html">
+        <span class="card-index">04 / AER1217</span>
+        <h3>Autonomous drone gate navigation</h3>
+        <p>
+          Informed RRT* global planning with degree-5 clamped B-spline smoothing,
+          flown closed-loop through a gate course on a real Crazyflie under Vicon.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">COMPLETE</span>
+          <span class="tag">RRT*</span>
+          <span class="tag">B-splines</span>
+          <span class="tag">Crazyflie</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/quadrotor-control.html">
+        <span class="card-index">05 / COURSEWORK</span>
+        <h3>Quadrotor control &amp; visual odometry</h3>
+        <p>
+          PID, LQR, and MPC tuned head-to-head for stabilization and trajectory
+          tracking, plus a RANSAC-hardened visual-odometry front end.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">COMPLETE</span>
+          <span class="tag">LQR</span>
+          <span class="tag">MPC</span>
+          <span class="tag">RANSAC VO</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/kickbox-coach.html">
+        <span class="card-index">06 / HARDWARE</span>
+        <h3>Kickbox coach: strike-measurement pod</h3>
+        <p>
+          Wrist/ankle-worn BLE IMU pod capturing ±200&nbsp;g impact transients off a
+          heavy bag. Custom nRF52832 board (design frozen, awaiting fab) with a
+          force, count, and heatmap dashboard.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">PCB DESIGNED</span>
+          <span class="tag">nRF52832</span>
+          <span class="tag">ADXL375</span>
+          <span class="tag">BLE</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/voron-24.html">
+        <span class="card-index">07 / FABRICATION</span>
+        <h3>Voron 2.4: self-built CoreXY printer</h3>
+        <p>
+          Full from-parts mechatronics build on Klipper with sensorless homing:
+          the fabrication backbone that prints parts for every other project here.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">OPERATIONAL</span>
+          <span class="tag">CoreXY</span>
+          <span class="tag">Klipper</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/fixed-wing-uav.html">
+        <span class="card-index">08 / COURSEWORK · AER1216</span>
+        <h3>Fixed-wing UAV modelling &amp; control</h3>
+        <p>
+          Propeller and range/endurance performance analysis, a CAD wing, and a
+          6-DoF Simulink simulation flown by cascaded altitude / pitch / heading
+          loops.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">COMPLETE</span>
+          <span class="tag">Simulink</span>
+          <span class="tag">6-DoF</span>
+          <span class="tag">Cascade control</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="section" id="next-up">
+    <div class="section-head">
+      <h2>Next up</h2>
+      <svg class="rule" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true" fill="none">
+        <line x1="0" y1="7" x2="200" y2="7" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+        <circle cx="70" cy="7" r="2.5" fill="var(--amber)"/>
+        <ellipse cx="150" cy="7" rx="8" ry="3.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+      </svg>
+      <span class="count">01 declared</span>
+    </div>
+
+    <div class="card-grid">
+      <div class="card card--todo">
+        <span class="card-index">09 / HARDWARE</span>
+        <h3>7-inch 6S quad build</h3>
+        <p>
+          The flying testbed everything converges on: carries Rinnegan
+          (Jetson + OAK-D) and, eventually,
+          <a href="projects/rook-flight-controller.html">Rook</a>, the custom
+          flight controller. Phase two is a from-scratch AM32 4-in-1 ESC to fly
+          under it.
+        </p>
+        <span class="todo-note">TODO: build log + bench photos + first flight logs</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="coursework">
+    <div class="section-head">
+      <h2>Coursework · upcoming</h2>
+      <svg class="rule" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true" fill="none">
+        <line x1="0" y1="7" x2="200" y2="7" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+        <circle cx="100" cy="7" r="2.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+      </svg>
+      <span class="count">05 slots reserved</span>
+    </div>
+
+    <div class="card-grid">
+      <div class="card card--todo">
+        <span class="card-index">AER1513 · UTIAS (BARFOOT)</span>
+        <h3>State Estimation project</h3>
+        <p>Fall 2026</p>
+        <span class="todo-note">TODO: assets + writeup</span>
+      </div>
+      <div class="card card--todo">
+        <span class="card-index">ECE1647</span>
+        <h3>Nonlinear Control project</h3>
+        <p>Fall 2026</p>
+        <span class="todo-note">TODO: assets + writeup</span>
+      </div>
+      <div class="card card--todo">
+        <span class="card-index">ECE1756</span>
+        <h3>FPGA / Reconfigurable Computing project</h3>
+        <p>Fall 2026</p>
+        <span class="todo-note">TODO: assets + writeup</span>
+      </div>
+      <div class="card card--todo">
+        <span class="card-index">ECE1521</span>
+        <h3>Detection &amp; Estimation project</h3>
+        <p>Winter 2027</p>
+        <span class="todo-note">TODO: assets + writeup</span>
+      </div>
+      <div class="card card--todo">
+        <span class="card-index">AER1516 · UTIAS (KELLY)</span>
+        <h3>Motion Planning project</h3>
+        <p>Winter 2027</p>
+        <span class="todo-note">TODO: assets + writeup</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="contact">
+    <span>© 2026 Chris McGale · built by hand, no framework</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
 </body>
-
-<script src="script.js"></script>
 </html>

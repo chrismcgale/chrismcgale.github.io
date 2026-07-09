@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinnegan: GPS-denied cooperative perception · mcgale.dev</title>
+  <meta name="description" content="GPS-denied cooperative perception: multi-agent VIO with inter-agent loop closures, robust pose-graph optimization, and pixel-level relay of one agent's detections into another's view.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 02</p>
+
+  <div class="project-head">
+    <span class="card-index">02 / ACTIVE RESEARCH</span>
+    <h1>Rinnegan</h1>
+    <p class="subtitle">
+      GPS-denied cooperative perception for drone and wearable platforms.
+      N agents each run visual-inertial odometry; the team estimates a shared
+      reference frame online from inter-agent loop closures and robust
+      pose-graph optimization: no GPS, no central server, tolerant of degraded
+      comms. The product is relayed perception: what one agent sees, rendered
+      correctly in every other agent's view, including through walls.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- two agent trajectories meeting in a shared factor graph -->
+      <svg viewBox="0 0 960 110" preserveAspectRatio="none" fill="none">
+        <path d="M20 90 L180 60 L340 75 L500 40 L660 55 L820 25" stroke="var(--line-strong)" stroke-width="1.2"/>
+        <path d="M20 20 L200 45 L380 30 L500 40 L680 20 L860 45" stroke="var(--line-strong)" stroke-width="1.2"/>
+        <rect x="95" y="68" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="255" y="60" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="415" y="50" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="575" y="40" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="105" y="26" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="285" y="30" width="9" height="9" fill="var(--ink-soft)"/>
+        <rect x="585" y="23" width="9" height="9" fill="var(--ink-soft)"/>
+        <circle cx="180" cy="60" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="340" cy="75" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="660" cy="55" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="200" cy="45" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="380" cy="30" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="680" cy="20" r="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <!-- shared variable where both trajectories meet -->
+        <circle cx="500" cy="40" r="10" fill="var(--amber-wash)" stroke="var(--amber)" stroke-width="1.6"/>
+        <ellipse cx="500" cy="40" rx="30" ry="15" stroke="var(--amber)" stroke-width="1" transform="rotate(-12 500 40)"/>
+        <path d="M820 25 L860 45" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="3 3"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Active development</dd></div>
+      <div><dt>Estimation</dt><dd>Kimera-VIO · GTSAM / Kimera-RPGO</dd></div>
+      <div><dt>Dense mapping</dt><dd>Voxel-hash TSDF, C++/CUDA · 43 FPS HUD</dd></div>
+      <div><dt>Data</dt><dd>EuRoC · RealSense D455 · Isaac Sim</dd></div>
+      <div><dt>Comms</dt><dd>ROS 2 / FastDDS, degraded-comms tolerant</dd></div>
+      <div><dt>Hardware target</dt><dd>7-inch 6S FPV quad · OAK-D · Jetson</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <h2><span class="sec-no">1.</span>The metric is relay, not ATE</h2>
+    <p>
+      Multi-robot SLAM systems (Kimera-Multi, DOOR-SLAM, Swarm-SLAM, COVINS-G)
+      estimate a shared frame online from inter-agent loop closures, but they
+      score themselves on trajectory and map accuracy, not on whether a
+      teammate's detection lands correctly in <em>your</em> view. V2X
+      cooperative perception measures perception utility directly, but assumes
+      GPS/RTK hands every agent the shared frame for free. Rinnegan's
+      contribution is the composition: the shared frame is estimated
+      peer-to-peer with no server, and the headline metric is
+      <strong>relay utility</strong>: where a teammate's detection renders in
+      your view, in pixels and meters. Map merging is plumbing, not the
+      product.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/rin-hero.jpg" alt="Grayscale onboard camera view with a relayed target marked; overlay text reports relay error of 47 px" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>Relayed target rendered into a receiving agent's live view via the shared pose graph; no GT used.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <video controls muted loop playsinline preload="metadata" src="../assets/video/rinnegan-flagship.mp4"></video>
+      <figcaption><span class="fig-no">FIG 2</span>Flagship demo story: cooperative relay under mission conditions.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">2.</span>Per-agent pipeline</h2>
+    <p>
+      Each agent fuses time-synchronized stereo cameras and IMU into a 6-DoF
+      pose estimate, then contributes to a dense shared map rendered into a
+      heads-up display:
+    </p>
+    <ul>
+      <li><strong>Synchronizer</strong> (C++): time-aligns stereo frames + IMU into bundles (273 sync-fps on EuRoC, 3682/3682 frames).</li>
+      <li><strong>Kimera-VIO</strong>: stereo-inertial odometry; MH_01 ATE 0.216&nbsp;m RMSE.</li>
+      <li><strong>Cooperative back end</strong>: self-discovered inter-agent loop closures feed robust pose-graph optimization (GTSAM / Kimera-RPGO).</li>
+      <li><strong>Dense reconstruction</strong>: voxel-hash TSDF in C++/CUDA; the raycast HUD renders the shared map at 43&nbsp;FPS @ 640×480 (105&nbsp;FPS @ 320×240).</li>
+    </ul>
+    <p>
+      The core is C++ with a pybind11 bridge, so the Python eval harness and
+      scenario tooling drive the production pipeline rather than a
+      reimplementation. (The name: each subsystem is nicknamed for one of the
+      Six Paths of the Rinnegan, a shared visual ability across bodies.)
+    </p>
+
+    <h2><span class="sec-no">3.</span>Measured results</h2>
+    <ul>
+      <li>
+        <strong>Real-data cooperative relay, no ground truth anywhere</strong>:
+        two EuRoC sequences run as two agents: self-discovered inter-agent
+        closures recover the shared frame, relay error
+        <strong>0.159&nbsp;m vs 0.353&nbsp;m without cooperation</strong>
+        (MH_01×MH_02).
+      </li>
+      <li>
+        <strong>Through-wall relay</strong>: a real Faster R-CNN detection of
+        a person behind a solid wall, relayed into a fully-occluded receiver's
+        view at <strong>0.14&nbsp;m</strong> (GT-exact frame); the earned-frame
+        corner-scene version lands at <strong>0.6&nbsp;px / 0.07&nbsp;m</strong>.
+      </li>
+      <li>
+        <strong>System budgets on real VIO</strong>: yaw drift is the binding
+        constraint (~5° over 80&nbsp;m on Kimera/EuRoC against a ~1–2°
+        requirement); holding a 0.2&nbsp;m relay budget requires an inter-agent
+        loop closure roughly every 7&nbsp;m.
+      </li>
+    </ul>
+
+    <figure class="fig">
+      <img src="../assets/img/rin-cooperative.png" alt="Top-down EuRoC trajectories for two agents, estimated vs ground truth, with cooperative metrics: ATE A 0.212 m, ATE B 0.121 m, 22 closures" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Two-agent EuRoC cooperative run: estimated vs GT trajectories, 22 self-discovered inter-agent closures.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/rin-through-wall.png" alt="Composite: detector agent sees a person, receiver agent is fully occluded, shared dense map places the detection behind the divider" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>Through-wall relay: agent A detects, fully-occluded agent B receives the target in its shared dense map (no GT).</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">4.</span>When cooperation hurts, and the gate that stops it</h2>
+    <p>
+      An honest negative result, measured and root-caused: under correlated
+      per-agent drift, pose-graph optimization can make relay <em>worse</em>
+      than raw odometry. Rinnegan characterizes the regime (cooperation helps
+      on overlapping trajectories, hurts on dissimilar ones) and runs a
+      GT-free <strong>do-no-harm trust gate</strong> that keeps cooperation
+      from ever degrading below odometry (helps on 3/4 EuRoC pairs, falls back
+      cleanly on the 4th).
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/rin-vio-degradation.png" alt="Three plots of real Kimera-VIO degradation vs distance on EuRoC MH_01: scale error, position drift crossing the 0.2 m budget, and rotation drift exceeding the 2 degree requirement" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>Real Kimera-VIO drift vs distance (EuRoC MH_01): the budget analysis behind the closure-every-7&nbsp;m requirement.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">5.</span>Simulation &amp; comms</h2>
+    <p>
+      Multi-agent scenarios run in <strong>NVIDIA Isaac Sim</strong> (bridge
+      inspection and through-wall scenes with per-agent cameras) alongside
+      real data from EuRoC and a RealSense D455. Each agent's stack runs in its
+      own container, communicating over <strong>ROS&nbsp;2 / FastDDS</strong>;
+      the comms-dropout demo has one of three agents go dark mid-mission and
+      reconcile on reconnect.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/rin-isaac-bridge.jpg" alt="Isaac Sim render of a truss bridge over water used as a multi-agent inspection scene" loading="lazy">
+      <figcaption><span class="fig-no">FIG 6</span>Isaac Sim bridge-inspection scene used for multi-agent relay runs.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">6.</span>Toward hardware</h2>
+    <p>
+      The deployment path: learned-matcher inference via TensorRT, live OAK-D
+      stereo-inertial capture, an XR HUD consumer, and Jetson-class onboard
+      compute, with a <strong>7-inch 6S FPV quadrotor</strong> as the flying
+      platform. Interfaces are ROS&nbsp;2 end-to-end so the sim-validated stack
+      carries over unchanged.
+    </p>
+
+    <figure class="fig fig--todo">
+      <div class="fig-frame">
+        <span class="todo-stamp">ASSET PENDING</span>
+        <span class="todo-desc">The 7-inch quad: bench photo with compute payload visible</span>
+      </div>
+      <figcaption><span class="fig-no">FIG 7</span>Deployment platform.</figcaption>
+    </figure>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="submersivity.html">← 01 · Submersivity</a>
+    <a href="drone-gate-navigation.html">03 · Gate navigation →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

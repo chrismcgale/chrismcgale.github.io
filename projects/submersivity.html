@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submersivity: submarine → AI → AR pipeline · mcgale.dev</title>
+  <meta name="description" content="An ESP-DIVE-based submarine with YOLOv8 debris detection, COLMAP + ArUco basin localization, and a live XR HUD on Vuzix Smart Swim goggles. Published at IEEE ICMA.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 01</p>
+
+  <div class="project-head">
+    <span class="card-index">01 / FLAGSHIP · PUBLISHED · IEEE ICMA</span>
+    <h1>Submersivity</h1>
+    <p class="subtitle">
+      The full arc from bench to augmented reality: a battery-powered
+      submersible surveys Peter Street Basin, a fine-tuned YOLOv8s model
+      detects garbage in its camera feed, detections are localized in a
+      COLMAP-photogrammetry model of the basin registered via ArUco markers,
+      and the diver doing the cleanup sees distance, direction, and class cues
+      live in Vuzix Smart Swim XR goggles.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <svg viewBox="0 0 960 90" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="18" x2="960" y2="18" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M40 18 C 160 20, 240 55, 360 62 S 620 80, 760 60 S 900 35, 950 40" stroke="var(--amber)" stroke-width="1.3" stroke-dasharray="6 4"/>
+        <circle cx="360" cy="62" r="7" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <path d="M360 62 L400 40 M360 62 L410 66 M360 62 L390 82" stroke="var(--ink-soft)" stroke-width="0.9"/>
+        <g fill="var(--ink-soft)">
+          <circle cx="600" cy="66" r="1.7"/><circle cx="620" cy="74" r="1.7"/><circle cx="642" cy="64" r="1.7"/>
+          <circle cx="660" cy="76" r="1.7"/><circle cx="682" cy="68" r="1.7"/><circle cx="640" cy="82" r="1.7"/>
+          <circle cx="700" cy="78" r="1.7"/><circle cx="716" cy="66" r="1.7"/><circle cx="672" cy="84" r="1.7"/>
+        </g>
+        <rect x="880" y="30" width="20" height="13" fill="none" stroke="var(--amber)" stroke-width="1.2"/>
+        <path d="M880 36.5 h20 M890 30 v13" stroke="var(--amber)" stroke-width="0.8"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Published · IEEE ICMA</dd></div>
+      <div><dt>Context</dt><dd>Steve Mann's lab, University of Toronto</dd></div>
+      <div><dt>Vehicle</dt><dd>ESP-DIVE-based submersible · XIAO ESP32-S3 Sense camera · 3D-printed hull</dd></div>
+      <div><dt>Detection</dt><dd>YOLOv8s fine-tuned on 12,177 debris images</dd></div>
+      <div><dt>Localization</dt><dd>COLMAP photogrammetry + ArUco registration</dd></div>
+      <div><dt>Operator I/O</dt><dd>Vuzix Smart Swim XR HUD: distance / direction / class</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <h2><span class="sec-no">1.</span>Overview</h2>
+    <p>
+      Most underwater-inspection projects stop at "we ran a detector on a
+      video." Submersivity is the whole pipeline: a submarine we built and
+      piloted, the AI that runs against its camera feed, a basin-scale
+      localization layer, and an extended-reality HUD that puts the results in
+      front of the cleanup diver's eyes in real time. The system was developed
+      in Steve Mann's lab and deployed at Peter Street Basin (PSB), Toronto.
+    </p>
+    <p>
+      The mission is litter survey and recovery: pilot the sub over the basin,
+      detect garbage as it appears, place each detection in a mapped model of
+      the basin, and guide a diver to the nearest target with compass-style
+      cues, making underwater cleanup interactive and spatially aware rather
+      than blind grid-search.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-hero-group.jpg" alt="Three team members in front of the Submersivity poster: Chris holding the submarine, a teammate wearing the Smart Swim goggles" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>The team with the vehicle, the goggles, and the poster: XR Goggles and RC Submarine for Peter Street Basin Cleanup.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-basin-debris.jpg" alt="Peter Street Basin water surface strewn with floating debris, a swan swimming through it" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>The problem, resident swan included: floating and submerged litter across Peter Street Basin.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">2.</span>The vehicle</h2>
+    <p>
+      The submersible builds on the open-source <strong>ESP-DIVE</strong>
+      platform: battery-powered, multi-motor, with a 3D-printed hull (printed
+      on the <a href="voron-24.html">Voron 2.4</a>; the G-code archive still
+      has every part). A <strong>XIAO ESP32-S3 Sense</strong> camera board
+      captures underwater imagery and transmits frames topside for inference.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-internals.jpg" alt="The submarine opened on the bench: tail cone with propeller shroud and fins, hull tube, internal electronics sled with ballast syringes, camera dome, and WiFi antenna" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>The vehicle, opened: tail and propeller shroud, ballast syringes, electronics sled, camera dome, and the topside antenna link.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-esp-dive-pcb.jpg" alt="Round blue ESP-DIVE 1.0 PCB held in a hand, motor driver module soldered on and camera ribbon attached" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>The ESP-DIVE 1.0 board mid-assembly: motor driver on, servo headers and charge/boost pads populated by hand.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">3.</span>Detection</h2>
+    <p>
+      Debris detection is a <strong>YOLOv8s</strong> model fine-tuned on a
+      combined terrestrial + underwater dataset of <strong>12,177 images</strong>
+      (TACO, Trash-ICRA19, SeaClear). On the held-out validation set the model
+      reaches <strong>mAP50 0.883</strong>, precision 0.921, recall 0.825
+      (mAP50-95 0.687), good enough to flag partially-buried and translucent
+      debris in murky basin water.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-detection.jpg" alt="Murky underwater frame from the submarine with a detected piece of garbage highlighted in an inset" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>Live detection in basin conditions: submerged food packaging flagged from the sub's camera feed.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">4.</span>Basin-scale localization</h2>
+    <p>
+      Detections are only useful if you can go get them. The basin was
+      reconstructed with <strong>COLMAP</strong> structure-from-motion
+      photogrammetry (GoPro frame extraction, dense reconstruction on an
+      RTX&nbsp;5070), and the model is registered to the world with
+      <strong>ArUco markers</strong>. Each detection is projected into basin
+      coordinates and accumulated on a survey map.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-aruco-basin.jpg" alt="An ArUco marker sheet zip-tied to the dock railing above the basin water" loading="lazy">
+      <figcaption><span class="fig-no">FIG 6</span>Registration in the field: an ArUco marker deployed on the dock railing ties the reconstruction to the world.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-colmap.jpg" alt="Photogrammetric reconstruction of Peter Street Basin showing the dock wall and surrounding buildings" loading="lazy">
+      <figcaption><span class="fig-no">FIG 7</span>Photogrammetric reconstruction of Peter Street Basin.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-survey-map.png" alt="Survey map of Peter Street Basin with the camera path and 130 accumulated garbage detections in basin coordinates" loading="lazy">
+      <figcaption><span class="fig-no">FIG 8</span>Survey output: camera path and 130 garbage detections registered in basin coordinates.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">5.</span>The XR layer</h2>
+    <p>
+      The results don't land on a laptop; they land in front of the diver's
+      eyes. <strong>Vuzix Smart Swim</strong> goggles show live detections, a
+      reduced map of the basin with accumulated garbage locations, and a
+      compass-style indicator pointing at the nearest target with distance and
+      class. The machine perceives, the human recovers the garbage, and the
+      interface between them adds no friction: the Humanistic-Intelligence
+      thread that runs through the lab's work.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-hud-through-lens.jpg" alt="Through the Smart Swim eyepiece: the HUD showing a compass arrow, 10.3 m to the nearest target, and the basin mini-map" loading="lazy">
+      <figcaption><span class="fig-no">FIG 9</span>Through the eyepiece: the live HUD as the diver actually sees it, 10.3&nbsp;m to the nearest target.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-hud.png" alt="ESP-DIVE HUD screen showing a compass arrow, 4.1 m distance to the nearest target of class OTHER, and a mini-map of Peter St Basin" loading="lazy">
+      <figcaption><span class="fig-no">FIG 10</span>The HUD layout: nearest-target bearing and distance, plus the accumulated basin map.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/sub-goggles-selfie.jpg" alt="Chris in the lab wearing the swim goggles with the display pod fitted" loading="lazy">
+      <figcaption><span class="fig-no">FIG 11</span>Fitting the goggles in the lab.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">6.</span>Publication</h2>
+    <div class="pub-note">
+      <strong>Submersivity: XR-Guided Garbage Detection with an RC Submarine
+      for Peter Street Basin Cleanup</strong><br>
+      Chris McGale, Michel A. Herrera Viyella, Chan Park, Alexander Vicol,
+      Steve Mann · University of Toronto.<br>
+      IEEE International Conference on Mechatronics and Automation (ICMA).
+      <a href="../assets/docs/submersivity-icma.pdf">PDF ↗</a>
+      <em>(DOI link TODO once indexed.)</em>
+    </div>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="../index.html">← index</a>
+    <a href="rinnegan.html">02 · Rinnegan →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

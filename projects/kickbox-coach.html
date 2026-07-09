@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kickbox coach: wearable strike-measurement pod · mcgale.dev</title>
+  <meta name="description" content="A wrist/ankle-worn BLE IMU pod capturing ±200 g strike transients off a heavy bag: custom nRF52832 board, with a force/count/heatmap dashboard.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 06</p>
+
+  <div class="project-head">
+    <span class="card-index">06 / HARDWARE · PCB DESIGNED, AWAITING FAB</span>
+    <h1>Kickbox coach</h1>
+    <p class="subtitle">
+      A wearable strike-measurement pod: worn on wrists and feet, it captures
+      the impact transient every time you hit the heavy bag: ±200&nbsp;g
+      accelerometer, ring-buffered around the hit, shipped over BLE to a
+      dashboard that turns raw g-forces into strike force, count, and a
+      target heatmap.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- impact transient waveform with pre/post capture window -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="60" x2="960" y2="60" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M20 60 L 300 60 L 320 58 L 340 62 L 360 60 L 385 60 L 395 12 L 405 95 L 415 30 L 425 78 L 440 48 L 460 66 L 490 56 L 530 61 L 600 60 L 940 60" stroke="var(--amber)" stroke-width="1.4"/>
+        <rect x="345" y="6" width="230" height="88" fill="var(--amber-wash)" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="352" y="18" font-size="10" fill="var(--ink-faint)" font-family="monospace">-50ms</text>
+        <text x="530" y="18" font-size="10" fill="var(--ink-faint)" font-family="monospace">+200ms</text>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>PCB design frozen · boards not yet ordered · no field data yet</dd></div>
+      <div><dt>MCU / radio</dt><dd>Raytac MDBT42Q (nRF52832), BLE</dd></div>
+      <div><dt>Sensing</dt><dd>ADXL375 ±200 g · ICM-42688-P 6-axis</dd></div>
+      <div><dt>Power</dt><dd>MCP73831 charge · DW01A/FS8205A protect · MCP1700-3302 LDO</dd></div>
+      <div><dt>Interface</dt><dd>5-pad pogo (program/charge)</dd></div>
+      <div><dt>Capture</dt><dd>RAM ring buffer, ~50 ms pre / 200 ms post trigger</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <h2><span class="sec-no">1.</span>The measurement problem</h2>
+    <p>
+      A strike on a heavy bag is a violent, short transient, far beyond the
+      ±16&nbsp;g range of a normal IMU, over in tens of milliseconds. Getting a
+      usable force measurement means two sensors and a memory trick:
+    </p>
+    <ul>
+      <li>
+        an <strong>ADXL375</strong> (±200&nbsp;g) that stays in range through
+        the impact peak itself,
+      </li>
+      <li>
+        an <strong>ICM-42688-P</strong> 6-axis IMU for the motion around the
+        hit: limb orientation, swing, retraction,
+      </li>
+      <li>
+        a <strong>RAM ring buffer</strong> capturing continuously, so when the
+        impact trigger fires, the pod already has ~50&nbsp;ms of pre-impact
+        signal and keeps the following ~200&nbsp;ms. The transient is never
+        missed because capture started before the hit.
+      </li>
+    </ul>
+
+    <h2><span class="sec-no">2.</span>The board</h2>
+    <p>
+      The PCB (rev frozen) is built around a <strong>Raytac MDBT42Q</strong>
+      module, an nRF52832 with the antenna and RF layout already certified,
+      which keeps the radio risk out of a small board. Power is a single-cell
+      Li-Po chain: <strong>MCP73831</strong> charger,
+      <strong>DW01A + FS8205A</strong> battery protection, and an
+      <strong>MCP1700-3302</strong> LDO. Programming and charging come in
+      through a <strong>5-pad pogo interface</strong>; no connectors to rip
+      out of a device that gets punched for a living. One board design serves
+      all four limbs.
+    </p>
+    <p>
+      Honest status: the design is frozen
+      (<a href="../assets/docs/strikepod-schematic.pdf">schematic PDF ↗</a>),
+      but boards are still to be ordered and the ADXL375 placed; no strikes
+      have been captured on real hardware yet. This page will grow result data
+      when the hardware exists, not before.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/kickbox-pcb-iso.png" alt="KiCad 3D render of the strike pod PCB at an isometric angle showing the module footprint and pogo pads" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>Strike pod board, KiCad render: MDBT42Q footprint top, 5-pad pogo interface (V+ / GND / SWDIO / SWCLK / SYNC) on the edge.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/kickbox-pcb-top.png" alt="KiCad top-down render of the strike pod PCB" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>Top side: module footprint, pogo interface, battery pads.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/kickbox-pcb-bottom.png" alt="KiCad render of the PCB bottom side carrying the sensor and power ICs" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Bottom side: the working half. ADXL375 and ICM-42688-P sensor placements plus the charge/protect/regulate power chain.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">3.</span>The product layer: dashboard</h2>
+    <p>
+      The pod is the sensor; the <strong>dashboard</strong> is the product.
+      Captured transients stream over BLE and land as training data: strike
+      force per hit, strike count over a session, and a heatmap of where and
+      how hard you're hitting. The goal is a coach's eye, quantified:
+      is your cross actually harder this month, or does it just feel that way?
+    </p>
+
+    <figure class="fig fig--todo">
+      <div class="fig-frame">
+        <span class="todo-stamp">ASSET PENDING</span>
+        <span class="todo-desc">Dashboard mockup: force timeline, session counts, strike heatmap</span>
+      </div>
+      <figcaption><span class="fig-no">FIG 4</span>Session dashboard: force, count, heatmap.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">4.</span>Roadmap</h2>
+    <ul>
+      <li>
+        <strong>OAK-D stereo-inertial fusion</strong>: fuse pod IMU data with
+        stereo vision so strikes get full 3D context, not just the impact
+        signature.
+      </li>
+      <li>
+        <strong>SWIM waveform visualization</strong>: a sequential-wave
+        imprinting pass (Mann) rendering the strike waveforms themselves as a
+        visual layer.
+      </li>
+    </ul>
+
+    <figure class="fig">
+      <img src="../assets/img/kickbox-swim-rig.jpg" alt="A motorized rig on the floor: aluminum pole with an LED strip, drive wheels at each end, a power bank and a small control board" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>One of the lab's motorized SWIM rigs (Sequential Wave Imprinting Machine): an LED array swept through space imprints waveforms onto long-exposure views. The target visual language for strike data.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/kickbox-swim-lightpainting.jpg" alt="Long-exposure photograph of a green waveform drawn in mid-air with a swept LED array" loading="lazy">
+      <figcaption><span class="fig-no">FIG 6</span>SWIM in action: a waveform imprinted in mid-air on a long exposure. Strike transients rendered this way is the roadmap's end state.</figcaption>
+    </figure>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="quadrotor-control.html">← 05 · Quadrotor control</a>
+    <a href="voron-24.html">07 · Voron 2.4 →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>
