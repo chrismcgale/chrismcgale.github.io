@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/archriso/kicad_projects/kestrel/rook.kicad_sch")
-		(date "2026-07-08T21:12:15")
+		(date "2026-07-09T00:43:09")
 		(tool "Eeschema 10.0.3")
 		(textvar
 			(name "REV") "0.1")
@@ -704,66 +704,6 @@
 				(tstamps "/")
 			)
 			(tstamps "5d33b68f-7115-5871-a3f6-35845538a28e")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "C12")
-			(value "1uF")
-			(footprint "Capacitor_SMD:C_0402_1005Metric")
-			(fields
-				(field
-					(name "LCSC") "C52923")
-				(field
-					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "C")
-				(description "Unpolarized capacitor")
-			)
-			(property
-				(name "LCSC")
-				(value "C52923")
-			)
-			(property
-				(name "Sheetname")
-				(value "")
-			)
-			(property
-				(name "Sheetfile")
-				(value "rook.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "cap capacitor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "C_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "fa8237a5-fd8c-5573-b280-404f87b20d4f")
 			(units
 				(unit
 					(name "A")
@@ -8223,11 +8163,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C12")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
 				(ref "C13")
 				(pin "2")
 				(pintype "passive")
@@ -9838,11 +9773,6 @@
 			)
 			(node
 				(ref "C11")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C12")
 				(pin "1")
 				(pintype "passive")
 			)
