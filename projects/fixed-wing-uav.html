@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fixed-wing UAV modelling &amp; control · mcgale.dev</title>
-  <meta name="description" content="AER1216 coursework: fixed-wing UAV modelling, propeller and range/endurance performance analysis, and a full Simulink 6-DoF simulation with cascaded flight control loops.">
+  <meta name="description" content="AER1216 team design project: a preliminary fixed-wing patroller for Arctic surveillance under a $400 propulsion budget. Power-system trade study, XFLR5 wing analysis, blade-element propeller modelling validated against the UIUC database, range/endurance analysis, and a 6-DoF Simulink simulation flying a full mission under cascaded PID control.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,10 +30,14 @@
     <span class="card-index">08 / COURSEWORK · AER1216</span>
     <h1>Fixed-wing UAV modelling &amp; control</h1>
     <p class="subtitle">
-      The fixed-wing side of the UAV coursework: aircraft and propeller
-      performance analysis (range, endurance, hover), a wing modelled in CAD,
-      and a full 6-DoF Simulink simulation flown by cascaded control loops:
-      altitude, pitch, roll, heading, and velocity.
+      A preliminary design for an <strong>Arctic surveillance patroller</strong>:
+      a fixed-wing UAS that has to carry a 0.5&nbsp;kg sensor payload at least
+      25&nbsp;km, stall below 10&nbsp;m/s, stay passively stable, and do it on
+      a <strong>$400 CAD propulsion budget</strong> in weather that halves a
+      battery's capacity. The work runs from the power-system trade study and
+      wing aerodynamics through propeller and performance modelling to a
+      6-DoF Simulink simulation that flies the whole mission under its own
+      cascaded controllers.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -50,10 +54,13 @@
     </div>
 
     <dl class="meta-block">
-      <div><dt>Status</dt><dd>Complete · AER1216, Fundamentals of UAV</dd></div>
-      <div><dt>Analysis</dt><dd>Propeller performance · range · endurance · hover</dd></div>
-      <div><dt>Simulation</dt><dd>6-DoF fixed-wing model, Simulink</dd></div>
-      <div><dt>Control</dt><dd>Cascaded loops: altitude / pitch / roll / heading / velocity</dd></div>
+      <div><dt>Status</dt><dd>Complete · AER1216, Fundamentals of UAS (Fall 2025) · team design project</dd></div>
+      <div><dt>Brief</dt><dd>0.5&nbsp;kg payload · ≥25&nbsp;km range · stall ≤10&nbsp;m/s · 100&nbsp;m cruise · hand launch or VTOL</dd></div>
+      <div><dt>Budget</dt><dd>$400 CAD propulsion / battery · propulsion ≤40% of vehicle weight</dd></div>
+      <div><dt>Aero</dt><dd>Thin-airfoil theory · XFOIL + lifting-line (XFLR5 v6.61) · taper study</dd></div>
+      <div><dt>Propulsion</dt><dd>Momentum-blade-element model vs. UIUC wind-tunnel data · battery discharge modelling</dd></div>
+      <div><dt>Simulation</dt><dd>6-DoF nonlinear model, MATLAB / Simulink · mission state machine</dd></div>
+      <div><dt>Control</dt><dd>4 inner + 3 outer PID loops · derivative-on-measurement · load-factor compensation</dd></div>
       <div><dt>Team</dt><dd>with Feiyang Wu &amp; Clarence Zhang</dd></div>
       <div><dt>Reports</dt><dd><a href="../assets/docs/aer1216-performance.pdf">performance ↗</a> · <a href="../assets/docs/aer1216-simulink.pdf">simulation ↗</a></dd></div>
     </dl>
@@ -61,32 +68,189 @@
 
   <article class="article prose">
 
-    <h2><span class="sec-no">1.</span>Airframe &amp; performance</h2>
+    <h2><span class="sec-no">1.</span>The brief</h2>
     <p>
-      Before anything flies, the numbers: propeller performance curves, and
-      range, endurance, and hover analysis for fixed-wing and multirotor
-      configurations, worked in the
-      <a href="../assets/docs/aer1216-performance.pdf">performance report</a>.
-      The wing itself was modelled in CAD with control surfaces cut in.
+      The Canadian Arctic is about 40% of the country's landmass and home to
+      under 1% of its people. Surveillance and rescue flights there are
+      expensive, and in the worst weather they are simply not flown. The
+      course project framed this as a call for proposals: two low-cost UAS
+      designs for the Department of National Defence. One was a
+      <strong>fixed-wing patroller</strong> for long-range reconnaissance.
+      The other was a <strong>multirotor courier</strong> for 2&nbsp;km
+      package runs between posts. This page covers the patroller. Its
+      multirotor sibling shares the same toolchain and is summarized at the
+      end.
+    </p>
+    <p>
+      The patroller requirements were tight enough that they fight each
+      other:
+    </p>
+    <table class="spec">
+      <thead><tr><th>Requirement</th><th>Target</th><th>Why it bites</th></tr></thead>
+      <tbody>
+        <tr><td>Payload</td><td>0.5&nbsp;kg of sensors</td><td>Carried on top of all fuel and batteries</td></tr>
+        <tr><td>Range</td><td>≥25&nbsp;km, more scores higher</td><td>Competes directly with the weight and cost caps</td></tr>
+        <tr><td>Propulsion mass</td><td>≤40% of total weight</td><td>Rules out simply carrying more battery</td></tr>
+        <tr><td>Stall speed</td><td>≤10&nbsp;m/s</td><td>Needed for hand launch; sets the wing loading</td></tr>
+        <tr><td>Launch</td><td>Hand launch or VTOL</td><td>No runway at remote posts</td></tr>
+        <tr><td>Cruise</td><td>100&nbsp;m altitude</td><td>Mission profile for survey passes</td></tr>
+        <tr><td>Stability</td><td>Passively stable, static and dynamic</td><td>Minimizes control effort in gusty air</td></tr>
+        <tr><td>Cost</td><td>≤$400 CAD propulsion + fuel/battery</td><td>Every part is sourced against this line</td></tr>
+      </tbody>
+    </table>
+
+    <h2><span class="sec-no">2.</span>Choosing the power system</h2>
+    <p>
+      Most design decisions settled quickly. The power system did not, and
+      it took the most research. The problem is that the Arctic undercuts
+      every option in a different way:
+    </p>
+    <ul>
+      <li>
+        <strong>LiPo batteries</strong> are quiet, efficient, and cheap, but
+        their energy density is far below hydrocarbon fuel, and cold is brutal
+        to them. At −20&nbsp;°C, usable capacity can fall to around
+        <strong>50%</strong> of rated, and charging below 0&nbsp;°C can
+        permanently damage the pack.
+      </li>
+      <li>
+        <strong>Small combustion engines</strong> have the energy density and
+        shrug off the cold, but they add moving parts and maintenance. The
+        market for small UAS engines is also thin. The smallest suitable
+        engine we could source from a Canadian supplier, a
+        <strong>DLE-20 at $418 CAD</strong>, blew the entire propulsion budget
+        before a propeller, fuel system, or tank was added.
+      </li>
+      <li>
+        <strong>Hydrogen fuel cells</strong> looked like the best of both:
+        roughly three times battery endurance, silent, and zero emissions.
+        But commercial UAV systems run <strong>$3,000 to $8,000</strong> per
+        unit, and most are rated only to about −5&nbsp;°C, which is useless
+        below −20&nbsp;°C.
+      </li>
+    </ul>
+    <p>
+      The budget made the call: the patroller is <strong>electric</strong>,
+      and cold is treated as a design constraint, not ignored. That means
+      budgeting range on derated cold-weather battery capacity and planning
+      thermal management for the pack. The proposal also
+      preferred domestic suppliers wherever a part was available in Canada.
+      The multirotor, with a $2,000 whole-system budget, had room for more
+      capable components but needs the same careful thermal management.
+    </p>
+
+    <h2><span class="sec-no">3.</span>Wing aerodynamics</h2>
+    <p>
+      The aerodynamics started from first principles and moved to numerical
+      tools, checking each against the last. Thin-airfoil theory gave closed-form
+      lift for a symmetric <strong>NACA 0012</strong> and a cambered
+      <strong>NACA 2412</strong>. <strong>XFOIL</strong>, run through
+      <strong>XFLR5 v6.61</strong> at fixed Reynolds and Mach number, then
+      gave the viscous 2D polars. The cambered section produces more lift at
+      every angle of attack, as the theory predicts.
+    </p>
+    <p>
+      For the finite wing, XFLR5's <strong>lifting-line</strong> solver gave
+      the 3D lift-curve slope from −5° to 20° and the spanwise lift
+      distribution. The finite-wing slope comes out below the 2D value:
+      that is induced downwash, made visible. The loading is nearly
+      elliptical with the expected fall-off at the tips. A taper-ratio study
+      then showed that tapering the planform pushes the load closer to
+      elliptical and slightly raises the lift-curve slope. It also showed
+      where the tool stops being trustworthy. Lifting-line assumes attached,
+      linear flow, so it stops converging past about 19° angle of attack,
+      and there it signals the onset of stall rather than predicting it.
     </p>
 
     <figure class="fig">
       <img src="../assets/img/fw-wing-cad.jpg" alt="CAD render of a tapered wing with ailerons and body axes marked" loading="lazy">
-      <figcaption><span class="fig-no">FIG 1</span>Wing model with control surfaces, body axes marked.</figcaption>
+      <figcaption><span class="fig-no">FIG 1</span>Wing model with the control surfaces cut in and body axes marked.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">2.</span>Simulink flight control</h2>
+    <h2><span class="sec-no">4.</span>Propeller and performance modelling</h2>
     <p>
-      The simulation is a full 6-DoF fixed-wing model in Simulink, flown by
-      cascaded loops: an outer altitude-hold loop commanding pitch, an inner
-      pitch controller driving elevator deflection, with roll, heading, and
-      velocity/climb loops alongside and saturation limits between the
-      controllers and the dynamics.
+      Propeller choice drives both range and the budget, so we wanted a
+      propeller model we could trust before comparing candidates. We
+      implemented <strong>momentum-blade element theory</strong> in MATLAB.
+      Blade geometry came from the <strong>UIUC propeller database</strong>,
+      and we assumed a constant section drag coefficient
+      (c<sub>d</sub>&nbsp;=&nbsp;0.05), a lift-curve slope of 5.2&nbsp;rad⁻¹,
+      and a −6° zero-lift angle. We then validated the model against UIUC's
+      measured wind-tunnel data for an <strong>APC SF 9×4.7</strong> at
+      6000&nbsp;RPM, from 0 to 17&nbsp;m/s.
     </p>
+    <p>
+      The comparison was humbling in a useful way. The model gets the trends
+      right and correctly places peak efficiency at an advance ratio of
+      J&nbsp;≈&nbsp;0.3 to 0.4. But it <strong>overpredicts thrust by 20 to
+      25%</strong> across the range (24.5% static) and overpredicts torque
+      too. It also predicts negative thrust past J&nbsp;=&nbsp;0.66, while the
+      real propeller still produces thrust at 0.75. We traced each error to a
+      model assumption:
+    </p>
+    <ul>
+      <li>constant drag, which ignores Reynolds effects</li>
+      <li>linear aerodynamics, so no stall</li>
+      <li>uniform inflow</li>
+      <li>no tip losses</li>
+      <li>blade geometry sampled at discrete stations</li>
+    </ul>
+    <p>
+      The takeaway we carried into design: use the model to rank propellers,
+      and lean on measured data for absolute thrust.
+    </p>
+    <p>
+      For performance, we built the closed-form <strong>range and endurance</strong>
+      relations for both propeller and jet aircraft on a parabolic drag polar
+      over an <strong>ISA atmosphere</strong> model. The atmosphere runs to
+      20&nbsp;km, with a linear lapse to 11&nbsp;km and isothermal above. We
+      then swept range, endurance, maximum rate of climb, and the
+      velocity-altitude envelope against altitude. On the multirotor side,
+      hover endurance was computed from a battery discharge model rather than
+      nameplate capacity, which matters when cold already takes half of it.
+    </p>
+
+    <h2><span class="sec-no">5.</span>Flight control in Simulink</h2>
+    <p>
+      The simulation is a full nonlinear <strong>6-DoF</strong> fixed-wing
+      model in Simulink, following Beard and McLain's <em>Small Unmanned
+      Aircraft</em> formulation. A <strong>mission state machine</strong>
+      sequences the flight and hands setpoints to seven PID loops. Four inner
+      loops drive the four control devices: elevator, ailerons, rudder, and
+      throttle. Three outer loops handle altitude hold, steady climb, and
+      heading. Every controller uses <strong>derivative on
+      measurement</strong>, so a step in the setpoint doesn't produce a
+      derivative kick.
+    </p>
+    <ul>
+      <li>
+        <strong>Altitude</strong> has two modes, hold and climb. Each has its
+        own PID, and both output a pitch command. The state machine switches
+        between them and uses the same mode flag to shut off the hold loop's
+        integrator while climbing, so it doesn't wind up.
+      </li>
+      <li>
+        <strong>Pitch</strong> drives the elevator, limited to ±30°.
+      </li>
+      <li>
+        <strong>Heading</strong> turns course error into a roll command.
+        Course is computed from the north and east velocities with atan2.
+        The error is wrapped through atan2(sin, cos), so the aircraft always
+        turns the short way and never snaps through ±180°. Banking costs
+        lift, so the pitch command is scaled by 1/cos(φ). That
+        load-factor compensation keeps altitude flat through the turn.
+      </li>
+      <li>
+        <strong>Roll</strong> drives the ailerons for coordinated turns,
+        limited to ±25°. <strong>Sideslip</strong> is regulated to zero
+        through the rudder, also limited to ±25°. <strong>Airspeed</strong>
+        drives throttle directly, from 0 to 1.
+      </li>
+    </ul>
 
     <figure class="fig">
       <img src="../assets/img/fw-controller-block.png" alt="Full Simulink block diagram: mission state machine feeding altitude, heading, and velocity controllers through saturation limits into aircraft dynamics" loading="lazy">
-      <figcaption><span class="fig-no">FIG 2</span>The full control architecture: mission state machine, per-axis controllers, saturation, aircraft dynamics.</figcaption>
+      <figcaption><span class="fig-no">FIG 2</span>The full control architecture: mission state machine, altitude-hold and steady-climb loops switched by mode, per-axis inner loops, saturation block, and the 6-DoF aircraft dynamics.</figcaption>
     </figure>
 
     <figure class="fig">
@@ -94,23 +258,57 @@
       <figcaption><span class="fig-no">FIG 3</span>Altitude-hold cascade: altitude error to pitch command to elevator deflection.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">3.</span>Flying the model</h2>
+    <h2><span class="sec-no">6.</span>Flying the mission</h2>
     <p>
-      The closed-loop model flies missions in the MATLAB animation below:
-      takeoff, climb, and cruise legs commanded by the mission state machine,
-      with the aircraft tracking through the world frame.
+      The state machine flies a complete patrol leg with no human input. It
+      starts from rest, takes off, and climbs steadily to 100&nbsp;m. It then
+      cruises 500&nbsp;m, holding altitude with <strong>under 2%
+      overshoot</strong> and little steady-state error. It then slows to the
+      design <strong>stall speed of 8.4&nbsp;m/s</strong> and flies a
+      coordinated turn at 8 to 10° of bank. The heading setpoint is ramped at
+      the turn rate ω&nbsp;=&nbsp;V<sub>a</sub>/R rather than stepped. That
+      gives a turn radius of <strong>38.9 to 48.8&nbsp;m</strong> before the
+      aircraft settles onto its new heading and returns to cruise, still at
+      100&nbsp;m.
     </p>
 
     <figure class="fig">
-      <video controls muted loop playsinline preload="metadata" src="../assets/video/fw-flight-anim.mp4"></video>
-      <figcaption><span class="fig-no">FIG 4</span>Closed-loop mission in the MATLAB animation (phone capture; cleaner export TODO).</figcaption>
+      <img src="../assets/img/fw-mission-states.png" alt="Grid of sixteen time-series plots over 120 seconds: north/east position, altitude climbing to 100 m and holding, roll, pitch and yaw angles, body velocities and rates, and elevator, aileron, rudder, and throttle commands, with the turn visible near 90 to 100 seconds" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>The full 120&nbsp;s mission. Left column: position, altitude, attitude, then elevator and rudder. Right column: body velocities and rates, then aileron and throttle. The climb to 100&nbsp;m ends near 52&nbsp;s. The slow-speed turn around 90 to 100&nbsp;s swings heading about 90° while altitude holds flat.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">4.</span>Credits</h2>
+    <figure class="fig">
+      <video controls muted loop playsinline preload="metadata" src="../assets/video/fw-flight-anim.mp4"></video>
+      <figcaption><span class="fig-no">FIG 5</span>The closed-loop mission in the MATLAB animation (phone capture; cleaner export TODO).</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">7.</span>The multirotor courier</h2>
     <p>
-      Team coursework with <strong>Feiyang Wu</strong> and
-      <strong>Clarence Zhang</strong>. The quadrotor half of this course
-      lineage lives in <a href="quadrotor-control.html">project 04</a>.
+      The courier's controller uses PD inner loops on body rates, limited to
+      1.5&nbsp;rad/s. Its outer loops command accelerations, saturated at
+      ±2&nbsp;m/s². We deliberately avoided the usual small-angle shortcuts:
+      pitch and roll setpoints are computed from the full nonlinear relation
+      between commanded acceleration, yaw, and thrust. That leaves room for
+      aggressive maneuvers later, even though the delivery route doesn't need
+      them. It flew the winding multi-post route with minimal overshoot and
+      low attitude oscillation. The quadrotor control work from the
+      companion course lives in <a href="quadrotor-control.html">project 05</a>.
+    </p>
+
+    <h2><span class="sec-no">8.</span>Toolchain</h2>
+    <ul>
+      <li><strong>MATLAB</strong>: blade-element propeller model, performance sweeps, ISA atmosphere, plotting</li>
+      <li><strong>Simulink</strong>: 6-DoF fixed-wing and quadrotor dynamics, controllers, mission state machines</li>
+      <li><strong>XFLR5 v6.61 / XFOIL</strong>: 2D airfoil polars, lifting-line finite-wing and taper analysis</li>
+      <li><strong>UIUC Propeller Data Site</strong>: blade geometry and wind-tunnel C<sub>T</sub> / C<sub>Q</sub> for validation</li>
+      <li><strong>Python</strong>: supporting performance calculations</li>
+      <li><strong>CAD</strong>: wing model with control surfaces</li>
+    </ul>
+
+    <h2><span class="sec-no">9.</span>Credits</h2>
+    <p>
+      Team project with <strong>Feiyang Wu</strong> and
+      <strong>Clarence Zhang</strong>.
     </p>
 
   </article>

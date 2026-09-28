@@ -1,7 +1,7 @@
 (export
 	(version "E")
 	(design
-		(source "/home/archriso/kicad_projects/kestrel/rook.kicad_sch")
+		(source "/home/archriso/electronics/kicad_projects/kestrel/rook.kicad_sch")
 		(date "2026-07-09T00:43:09")
 		(tool "Eeschema 10.0.3")
 		(textvar
