@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQI node: indoor air-quality monitor · mcgale.dev</title>
+  <meta name="description" content="An indoor air-quality monitor (true CO2, PM, VOC, NOx, RH/T) on a custom ESP32-S3 board, with an enclosure airflow design validated in OpenFOAM CFD.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 11</p>
+
+  <div class="project-head">
+    <span class="card-index">11 / HARDWARE · CFD · FAB-READY</span>
+    <h1>AQI node</h1>
+    <p class="subtitle">
+      An indoor air-quality monitor measuring photoacoustic CO₂ (rather than a
+      VOC-derived "eCO₂" estimate), particulate matter, and VOC and NOx
+      indices, housed in a desk enclosure whose airflow was analysed with CFD
+      before printing. Status is shown by an LED ring; the device has no
+      screen.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- intake → puck → exhaust, with the splitter fin -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="80" x2="960" y2="80" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M40 40 C 160 40, 240 60, 380 60" stroke="var(--ink-soft)" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <path d="M40 56 C 160 56, 240 66, 380 66" stroke="var(--ink-soft)" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <ellipse cx="480" cy="30" rx="90" ry="12" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
+        <path d="M390 30 L 390 72 M570 30 L 570 72" stroke="var(--ink)" stroke-width="1.3"/>
+        <path d="M390 72 C 420 84, 540 84, 570 72" stroke="var(--ink)" stroke-width="1.3"/>
+        <ellipse cx="480" cy="30" rx="70" ry="8" fill="none" stroke="var(--amber)" stroke-width="1.5"/>
+        <line x1="584" y1="48" x2="584" y2="78" stroke="var(--amber)" stroke-width="2"/>
+        <path d="M600 60 C 700 50, 780 30, 920 18" stroke="var(--amber)" stroke-width="1.2"/>
+        <path d="M600 68 C 700 60, 790 44, 920 34" stroke="var(--amber)" stroke-width="1" stroke-dasharray="4 3"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Board routed · DRC/SPICE gates green · JLCPCB package generated · enclosure CFD-validated · not yet ordered</dd></div>
+      <div><dt>Sensors</dt><dd>Sensirion SEN55 (PM1–10, VOC, NOx, RH/T) · SCD41 (true CO₂) · SHT45 (reference RH/T)</dd></div>
+      <div><dt>MCU</dt><dd>ESP32-S3-MINI-1 · WiFi · InfluxDB / Home Assistant</dd></div>
+      <div><dt>Power</dt><dd>USB-C 5&nbsp;V · polyfuse · 3.3&nbsp;V buck (not an LDO: see §3) · TVS + I²C ESD</dd></div>
+      <div><dt>Board</dt><dd>4-layer · schematic-as-code (SKiDL) · SPICE on extracted parasitics</dd></div>
+      <div><dt>Enclosure</dt><dd>OpenSCAD-parametric puck · printed on my Voron · OpenFOAM-checked vents</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-assembly-open.png" alt="OpenSCAD render of the open puck enclosure: the green Sensirion SEN55 module sits in the center bay, surrounded by a magenta LED flex ring with white WS2812 LEDs, inside a grey cylindrical shell with louvred side vents" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>The enclosure with its lid removed. The SEN55 (green, Sensirion's STEP model) sits in its bay, surrounded by the WS2812 LED ring that shines through the translucent bottom face.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">1.</span>Sensors</h2>
+    <p>
+      CO₂ is the most useful single indicator for a home or office. It tracks
+      occupancy and ventilation, and concentrations above about
+      1000&nbsp;ppm are associated with drowsiness and reduced concentration.
+      Many low-cost monitors report "eCO₂" estimated from a VOC sensor, which
+      does not reliably reflect ventilation. This design uses a photoacoustic
+      NDIR sensor (SCD41). The Sensirion SEN55 adds PM1/2.5/4/10, a
+      self-baselining VOC index, a NOx index (relevant for gas stoves), and
+      RH/T, through a single intake with Sensirion's sensor-fusion
+      algorithms. A separate SHT45 in the cool intake air measures room
+      temperature, because the SEN55's internal RH/T sensor sits in its own
+      heated airflow.
+    </p>
+
+    <h2><span class="sec-no">2.</span>Enclosure airflow</h2>
+    <p>
+      Unlike a sealed enclosure, an air-quality sensor has to exchange air
+      freely while avoiding two errors. First, exhaust from the particulate
+      sensor's fan must not recirculate into its own inlet, which would bias
+      the particulate reading. Second, heat from the board must not reach the
+      temperature sensor, which would otherwise read several kelvin high.
+      Sensirion's design-in guidelines specify requirements for both, and I
+      modelled each case in OpenFOAM before committing to a printed shell.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-cfd-recirc.png" alt="Two 2D CFD tracer plots side by side. Before: exhaust tracer loops back over the inlet, recirculation 0.895. After: a splitter fin between inlet and exhaust sends the plume away, recirculation 0.000" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>Exhaust-recirculation study (OpenFOAM, laminar, mass-balanced fan). A passive tracer released at the exhaust shows that 89.5% of the air at the inlet was recirculated exhaust. A splitter fin between the vents reduces this to zero in the simulation.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-cfd-selfheat.png" alt="Two natural-convection CFD temperature fields of the puck cavity. Baseline with louvres on one side: the SHT45 corner is about 40 K above ambient. With a cross-vent added: about 5 K, and the cavity average drops from 12.6 to 6.6 K" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Self-heating study (buoyantSimpleFoam, natural convection, 1.2&nbsp;W on the board). Adding a cross-vent halves the cavity temperature rise and reduces the rise at the RH/T sensor corner from +40&nbsp;K to +5&nbsp;K. The absolute values are conservative (peak power, lumped heat source); the relative improvement is the relevant result.</figcaption>
+    </figure>
+
+    <p>
+      The mechanical CAD is parametric and checked by automated tests before
+      printing. One test confirms that every part is a single connected body,
+      one confirms that each part slices without supports, and one runs
+      boolean interference and minimum-clearance checks in both positions of
+      every joint, against Sensirion's STEP geometry. These tests found errors
+      that visual review of the renders had missed: floating pads, a grille
+      cut breaking through the curved wall, and a bayonet cam that interfered
+      in its locked position.
+    </p>
+
+    <h2><span class="sec-no">3.</span>The board</h2>
+    <p>
+      The board reuses an earlier platform of mine: ESP32-S3-MINI-1, KiCad to
+      JLCPCB assembly, and firmware with an offline ring buffer that uploads
+      to InfluxDB. The 5&nbsp;V rail supplies the SEN55's fan and laser, and a
+      <strong>buck converter</strong> rather than an LDO produces the
+      3.3&nbsp;V rail. At peak load an LDO would dissipate about 1&nbsp;W
+      inside the measured airspace, against about 0.2&nbsp;W for the buck, so
+      the buck reduces the heat source directly.
+    </p>
+    <p>
+      As with <a href="rook-flight-controller.html">Rook</a>, the netlist is
+      defined in code. One SKiDL source generates the board, and a separate
+      generator produces the readable, sectioned schematic. The fabrication
+      script only emits gerbers, BOM and pick-and-place files if every check
+      passes: DRC against a documented list of accepted exceptions, a
+      pre-fabrication layout check, and a SPICE suite run on parasitics
+      extracted from the routed copper (trace resistance, microstrip
+      capacitance over the inner planes, via inductance). The BOM check found
+      a real error: the schematic generator had drifted from the netlist
+      source and still referenced a switch that had been rejected as
+      unassemblable.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-pcb-iso.png" alt="Isometric KiCad 3D render of the black AQI node board, top side: ESP32-S3-MINI-1 land pattern, the SCD41 CO2 sensor footprint in the middle, USB-C at the top edge, JST connectors, and gold power test points" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>Top side, KiCad 3D render. ESP32-S3-MINI-1 land pattern (module body not modelled), the SCD41 CO₂ sensor in the middle, USB-C, the SEN55 cable (left) and LED-ring header (front), plus gold test pads for bring-up.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-pcb-bottom.png" alt="Isometric KiCad 3D render of the AQI node board's bottom side: buck converter and shielded inductor, a large electrolytic bulk capacitor, two tactile buttons, and passives" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>Bottom side. The buck converter, its inductor, the 5&nbsp;V bulk capacitor and the BOOT/RESET buttons are on this side, away from the sensors on the top face.</figcaption>
+    </figure>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="openscribe.html">← 10 · OpenScribe</a>
+    <a href="../index.html">index →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

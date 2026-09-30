@@ -30,12 +30,13 @@
     <span class="card-index">01 / FLAGSHIP · PUBLISHED · IEEE ICMA</span>
     <h1>Submersivity</h1>
     <p class="subtitle">
-      The full arc from bench to augmented reality: a battery-powered
-      submersible surveys Peter Street Basin, a fine-tuned YOLOv8s model
-      detects garbage in its camera feed, detections are localized in a
-      COLMAP-photogrammetry model of the basin registered via ArUco markers,
-      and the diver doing the cleanup sees distance, direction, and class cues
-      live in Vuzix Smart Swim XR goggles.
+      A system that runs from vehicle hardware to augmented reality. A
+      battery-powered submersible surveys Peter Street Basin, a fine-tuned
+      <strong>YOLOv8s</strong> model detects garbage in its camera feed,
+      detections are localized in a <strong>COLMAP</strong> photogrammetry
+      model of the basin registered with <strong>ArUco</strong> markers, and
+      the diver doing the cleanup sees distance, direction, and class cues in
+      <strong>Vuzix Smart Swim XR</strong> goggles in real time.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -68,19 +69,17 @@
 
     <h2><span class="sec-no">1.</span>Overview</h2>
     <p>
-      Most underwater-inspection projects stop at "we ran a detector on a
-      video." Submersivity is the whole pipeline: a submarine we built and
-      piloted, the AI that runs against its camera feed, a basin-scale
-      localization layer, and an extended-reality HUD that puts the results in
-      front of the cleanup diver's eyes in real time. The system was developed
-      in Steve Mann's lab and deployed at Peter Street Basin (PSB), Toronto.
+      Submersivity covers the full pipeline: a submarine we built and piloted,
+      object detection on its camera feed, localization of detections within
+      the basin, and an extended-reality display that presents the results to
+      the cleanup diver in real time. The system was developed in Steve Mann's
+      lab and deployed at Peter Street Basin (PSB), Toronto.
     </p>
     <p>
-      The mission is litter survey and recovery: pilot the sub over the basin,
-      detect garbage as it appears, place each detection in a mapped model of
-      the basin, and guide a diver to the nearest target with compass-style
-      cues, making underwater cleanup interactive and spatially aware rather
-      than blind grid-search.
+      The task is litter survey and recovery: pilot the submarine over the
+      basin, detect garbage as it appears, place each detection in a mapped
+      model of the basin, and guide a diver to the nearest target with
+      compass-style cues, instead of searching the basin on a grid.
     </p>
 
     <figure class="fig">
@@ -90,16 +89,16 @@
 
     <figure class="fig">
       <img src="../assets/img/sub-basin-debris.jpg" alt="Peter Street Basin water surface strewn with floating debris, a swan swimming through it" loading="lazy">
-      <figcaption><span class="fig-no">FIG 2</span>The problem, resident swan included: floating and submerged litter across Peter Street Basin.</figcaption>
+      <figcaption><span class="fig-no">FIG 2</span>Floating and submerged litter across Peter Street Basin.</figcaption>
     </figure>
 
     <h2><span class="sec-no">2.</span>The vehicle</h2>
     <p>
-      The submersible builds on the open-source <strong>ESP-DIVE</strong>
-      platform: battery-powered, multi-motor, with a 3D-printed hull (printed
-      on the <a href="voron-24.html">Voron 2.4</a>; the G-code archive still
-      has every part). A <strong>XIAO ESP32-S3 Sense</strong> camera board
-      captures underwater imagery and transmits frames topside for inference.
+      The submersible is based on the open-source <strong>ESP-DIVE</strong>
+      platform: battery-powered and multi-motor, with a 3D-printed hull
+      (printed on the <a href="voron-24.html">Voron 2.4</a>). A
+      <strong>XIAO ESP32-S3 Sense</strong> camera board captures underwater
+      imagery and transmits frames to the surface for inference.
     </p>
 
     <figure class="fig">
@@ -114,12 +113,12 @@
 
     <h2><span class="sec-no">3.</span>Detection</h2>
     <p>
-      Debris detection is a <strong>YOLOv8s</strong> model fine-tuned on a
-      combined terrestrial + underwater dataset of <strong>12,177 images</strong>
-      (TACO, Trash-ICRA19, SeaClear). On the held-out validation set the model
-      reaches <strong>mAP50 0.883</strong>, precision 0.921, recall 0.825
-      (mAP50-95 0.687), good enough to flag partially-buried and translucent
-      debris in murky basin water.
+      Debris detection uses a <strong>YOLOv8s</strong> model fine-tuned on a
+      combined terrestrial and underwater dataset of <strong>12,177
+      images</strong> (TACO, Trash-ICRA19, SeaClear). On the held-out
+      validation set it reaches <strong>mAP50 0.883</strong>, precision 0.921,
+      and recall 0.825 (mAP50-95 0.687), and it detects partially buried and
+      translucent debris in the basin's turbid water.
     </p>
 
     <figure class="fig">
@@ -129,10 +128,10 @@
 
     <h2><span class="sec-no">4.</span>Basin-scale localization</h2>
     <p>
-      Detections are only useful if you can go get them. The basin was
-      reconstructed with <strong>COLMAP</strong> structure-from-motion
-      photogrammetry (GoPro frame extraction, dense reconstruction on an
-      RTX&nbsp;5070), and the model is registered to the world with
+      To guide recovery, each detection needs a position in the basin. The
+      basin was reconstructed with <strong>COLMAP</strong> structure-from-motion
+      photogrammetry (frames extracted from GoPro video, dense reconstruction
+      on an RTX 5070), and the model is registered to the world with
       <strong>ArUco markers</strong>. Each detection is projected into basin
       coordinates and accumulated on a survey map.
     </p>
@@ -154,18 +153,18 @@
 
     <h2><span class="sec-no">5.</span>The XR layer</h2>
     <p>
-      The results don't land on a laptop; they land in front of the diver's
-      eyes. <strong>Vuzix Smart Swim</strong> goggles show live detections, a
-      reduced map of the basin with accumulated garbage locations, and a
-      compass-style indicator pointing at the nearest target with distance and
-      class. The machine perceives, the human recovers the garbage, and the
-      interface between them adds no friction: the Humanistic-Intelligence
-      thread that runs through the lab's work.
+      The results are displayed to the diver rather than on a laptop.
+      <strong>Vuzix Smart Swim</strong> goggles show live detections, a reduced
+      map of the basin with accumulated garbage locations, and a
+      compass-style indicator pointing to the nearest target with its distance
+      and class. The system detects and localizes the garbage and the diver
+      recovers it, following the Humanistic Intelligence approach that runs
+      through the lab's work.
     </p>
 
     <figure class="fig">
       <img src="../assets/img/sub-hud-through-lens.jpg" alt="Through the Smart Swim eyepiece: the HUD showing a compass arrow, 10.3 m to the nearest target, and the basin mini-map" loading="lazy">
-      <figcaption><span class="fig-no">FIG 9</span>Through the eyepiece: the live HUD as the diver actually sees it, 10.3&nbsp;m to the nearest target.</figcaption>
+      <figcaption><span class="fig-no">FIG 9</span>Through the eyepiece: the live HUD as seen by the diver, 10.3&nbsp;m to the nearest target.</figcaption>
     </figure>
 
     <figure class="fig">

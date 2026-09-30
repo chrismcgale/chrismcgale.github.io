@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chris McGale · robotics, state estimation, embedded hardware</title>
-  <meta name="description" content="Portfolio of Chris McGale: multi-agent visual-inertial odometry, an AR-linked ESP32 submarine, autonomous drones, and custom hardware built end-to-end.">
+  <meta name="description" content="Portfolio of Chris McGale: multi-agent visual-inertial odometry, an AR-linked ESP32 submarine, autonomous drones, and custom embedded hardware.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,10 +29,9 @@
     <h1>Chris McGale</h1>
     <p class="role">robotics · state estimation · embedded hardware</p>
     <p class="bio">
-      I build robotic systems end-to-end: from the PCB up through firmware,
-      perception, and factor-graph estimation. Current center of gravity:
-      multi-agent visual-inertial odometry on CUDA. Everything below was
-      designed, built, and debugged at my own bench.
+      I work on robotic systems across the stack: circuit boards, firmware,
+      perception, and factor-graph state estimation. My current focus is
+      multi-agent visual-inertial odometry on CUDA.
     </p>
   </section>
 
@@ -55,7 +54,7 @@
         <circle cx="120" cy="7" r="2.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
         <rect x="166" y="3" width="8" height="8" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
       </svg>
-      <span class="count">08 entries</span>
+      <span class="count">11 entries</span>
     </div>
 
     <div class="card-grid">
@@ -106,10 +105,9 @@
           <h3>Rinnegan: GPS-denied cooperative perception</h3>
           <p>
             N agents run Kimera-VIO; inter-agent loop closures and robust
-            pose-graph optimization (GTSAM) estimate a shared frame peer-to-peer:
-            no GPS, no server. The product is relayed perception: a teammate's
-            detection rendered in your view, through walls, at 0.6&nbsp;px /
-            0.07&nbsp;m, with a CUDA TSDF HUD at 43&nbsp;FPS. Target: a 7-inch 6S
+            pose-graph optimization (GTSAM) estimate a shared frame peer-to-peer, without GPS or a central server.
+            This lets one agent's detections be rendered in another agent's
+            view, including through walls, at 0.6&nbsp;px / 0.07&nbsp;m error, with a CUDA TSDF HUD at 43&nbsp;FPS. Target: a 7-inch 6S
             FPV quad.
           </p>
           <div class="card-tags">
@@ -147,7 +145,7 @@
           <p>
             A flight controller of my own design: a 4-layer STM32H743 board for
             a 7-inch 6S quad, laid out pin-for-pin compatible with Betaflight
-            and ArduPilot so both stacks run on it nearly for free. Reverse-poly
+            and ArduPilot so both firmware stacks can run on it with minimal porting. Reverse-poly
             protected 6S power tree, ICM-42688-P gyro on a dedicated low-noise
             LDO, whole schematic generated from code. Board routed, DRC-clean,
             pre-fab.
@@ -199,8 +197,9 @@
         <span class="card-index">05 / COURSEWORK</span>
         <h3>Quadrotor control &amp; visual odometry</h3>
         <p>
-          PID, LQR, and MPC tuned head-to-head for stabilization and trajectory
-          tracking, plus a RANSAC-hardened visual-odometry front end.
+          PD, LQR, and MPC position controllers compared on a 4&nbsp;m/s
+          circular tracking task, target localization from flight imagery,
+          and stereo visual odometry with RANSAC.
         </p>
         <div class="card-tags">
           <span class="tag tag--status">COMPLETE</span>
@@ -230,8 +229,9 @@
         <span class="card-index">07 / FABRICATION</span>
         <h3>Voron 2.4: self-built CoreXY printer</h3>
         <p>
-          Full from-parts mechatronics build on Klipper with sensorless homing:
-          the fabrication backbone that prints parts for every other project here.
+          A CoreXY printer built from parts, running Klipper with sensorless
+          homing. It prints the mechanical parts for the other hardware
+          projects on this site.
         </p>
         <div class="card-tags">
           <span class="tag tag--status">OPERATIONAL</span>
@@ -256,6 +256,57 @@
         </div>
       </a>
 
+      <a class="card" href="projects/multirotor-uav.html">
+        <span class="card-index">09 / COURSEWORK · AER1216</span>
+        <h3>Multirotor UAV modelling &amp; control</h3>
+        <p>
+          The quadrotor courier from the same Arctic proposal: Newton-Euler
+          dynamics and rotor mixing built in Simulink, a cascaded controller
+          with nonlinear attitude inversion, a simulated multi-leg delivery
+          route, and hover and forward-flight power modelling.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">COMPLETE</span>
+          <span class="tag">Simulink</span>
+          <span class="tag">6-DoF</span>
+          <span class="tag">Momentum theory</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/openscribe.html">
+        <span class="card-index">10 / HARDWARE + SELF-HOSTED</span>
+        <h3>OpenScribe: open-source voice recorder</h3>
+        <p>
+          A card-sized ESP32-S3 recorder of my own design that syncs to a
+          self-hosted pipeline for transcription, diarization, and search.
+          It has no subscription and works with any speech-to-text model. Rev A
+          boards are in bring-up.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">REV A BRING-UP</span>
+          <span class="tag">ESP32-S3</span>
+          <span class="tag">Opus</span>
+          <span class="tag">Whisper</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/air-quality-node.html">
+        <span class="card-index">11 / HARDWARE · CFD</span>
+        <h3>AQI node: indoor air-quality monitor</h3>
+        <p>
+          Photoacoustic CO₂, particulate, VOC and NOx sensing in a desk
+          enclosure. The airflow was analysed in OpenFOAM before printing; a
+          splitter fin reduced exhaust recirculation at the inlet from 89% to
+          zero in simulation.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">FAB-READY</span>
+          <span class="tag">SEN55 + SCD41</span>
+          <span class="tag">OpenFOAM</span>
+          <span class="tag">KiCad</span>
+        </div>
+      </a>
+
     </div>
   </section>
 
@@ -272,14 +323,13 @@
 
     <div class="card-grid">
       <div class="card card--todo">
-        <span class="card-index">09 / HARDWARE</span>
+        <span class="card-index">12 / HARDWARE</span>
         <h3>7-inch 6S quad build</h3>
         <p>
-          The flying testbed everything converges on: carries Rinnegan
-          (Jetson + OAK-D) and, eventually,
+          A test vehicle for Rinnegan (Jetson + OAK-D) and, later,
           <a href="projects/rook-flight-controller.html">Rook</a>, the custom
-          flight controller. Phase two is a from-scratch AM32 4-in-1 ESC to fly
-          under it.
+          flight controller. A second phase adds an AM32 4-in-1 ESC of my own
+          design.
         </p>
         <span class="todo-note">TODO: build log + bench photos + first flight logs</span>
       </div>

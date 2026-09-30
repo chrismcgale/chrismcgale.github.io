@@ -30,10 +30,7 @@
     <span class="card-index">04 / AER1217 · TEAM PROJECT</span>
     <h1>Autonomous drone gate navigation</h1>
     <p class="subtitle">
-      A full planning-and-control pipeline (Informed RRT* global planning,
-      degree-5 clamped B-spline smoothing, closed-loop path following) flying
-      a Crazyflie through an ordered gate course, validated in simulation and
-      on real hardware under Vicon.
+      A planning and control pipeline (Informed RRT* global planning, degree-5 clamped B-spline smoothing, and closed-loop path following) that flies a Crazyflie through an ordered gate course. It was validated in simulation and on hardware under Vicon.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -68,27 +65,19 @@
 
     <h2><span class="sec-no">1.</span>Task</h2>
     <p>
-      Fly a Crazyflie nano-quadrotor through a course of gates, autonomously,
-      in the right order. That decomposes into four problems: find a
-      collision-free path through the gates, turn it into something a quadrotor
-      can actually fly, follow it closed-loop, and make sure the geometry of
-      "through the gate" is enforced rather than hoped for.
+      The task was to fly a Crazyflie nano-quadrotor autonomously through a course of gates in a specified order. This breaks down into four parts: finding a collision-free path through the gates, converting it into a trajectory the quadrotor can follow, tracking that trajectory in closed loop, and ensuring the vehicle passes through each gate opening rather than near it.
     </p>
 
     <h2><span class="sec-no">2.</span>Global planning: Informed RRT*</h2>
     <p>
-      The global planner is <strong>Informed RRT*</strong>: sampling-based,
-      asymptotically optimal, with the informed subset-sampling trick focusing
-      samples inside the ellipsoid that can still improve the current best
-      path. Gate ordering is enforced by planning gate-to-gate, and
+      The global planner is <strong>Informed RRT*</strong>: a sampling-based, asymptotically optimal planner that, once a solution exists, restricts sampling to the ellipsoid of states that could still improve the current best path. Gate ordering is enforced by planning gate-to-gate, and
       <strong>virtual anchor points</strong> on either side of each gate plane
-      force the path to approach and exit perpendicular to the gate, so the
-      spline through it can't clip a gate post.
+      force the path to approach and exit perpendicular to the gate plane, so the smoothed trajectory does not cut across a gate post.
     </p>
 
     <h2><span class="sec-no">3.</span>Trajectory smoothing: clamped B-splines</h2>
     <p>
-      Raw RRT* output is a polyline; a quadrotor wants smooth derivatives. The
+      RRT* produces a piecewise-linear path, while a quadrotor needs a trajectory with smooth derivatives. The
       waypoint path is refit as a <strong>degree-5 clamped B-spline</strong>:
       degree 5 for continuous acceleration and jerk, clamped so the trajectory
       hits the start and goal exactly. The spline is then
@@ -104,9 +93,7 @@
     <h2><span class="sec-no">4.</span>Closed-loop following &amp; hardware</h2>
     <p>
       The smoothed trajectory is tracked closed-loop, first in simulation and
-      then on a real Crazyflie flying under Vicon motion capture. The same
-      pipeline ran both; the sim-validated planner and follower transferred to
-      hardware without structural changes.
+      then on a real Crazyflie flying under Vicon motion capture. The same planner and tracking controller were used in both, with no structural changes between simulation and hardware.
     </p>
 
     <figure class="fig">

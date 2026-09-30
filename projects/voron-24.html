@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voron 2.4: self-built CoreXY printer · mcgale.dev</title>
-  <meta name="description" content="A from-parts Voron 2.4 CoreXY build on Klipper with sensorless homing: the fabrication backbone behind every other project on this site.">
+  <meta name="description" content="A Voron 2.4 CoreXY printer built from parts, running Klipper with sensorless homing. It prints the mechanical parts for the other hardware projects on this site.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,13 +27,10 @@
   <p class="crumb"><a href="../index.html">index</a> / 07</p>
 
   <div class="project-head">
-    <span class="card-index">07 / FABRICATION BACKBONE</span>
+    <span class="card-index">07 / FABRICATION</span>
     <h1>Voron 2.4</h1>
     <p class="subtitle">
-      A CoreXY printer built entirely from parts (frame, belts, wiring,
-      firmware), running Klipper with sensorless homing. Not a project for its
-      own sake: it's the machine that fabricates parts for everything else on
-      this site.
+      A CoreXY printer built from parts (frame, belts, wiring, firmware), running Klipper with sensorless homing. It is used to fabricate parts for the other hardware projects on this site.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -51,24 +48,18 @@
     </div>
 
     <dl class="meta-block">
-      <div><dt>Status</dt><dd>Operational · daily driver</dd></div>
+      <div><dt>Status</dt><dd>Operational · in regular use</dd></div>
       <div><dt>Kinematics</dt><dd>CoreXY, flying gantry (2.4)</dd></div>
       <div><dt>Firmware</dt><dd>Klipper · sensorless homing</dd></div>
-      <div><dt>Build</dt><dd>Full from-parts, no kit shortcuts</dd></div>
+      <div><dt>Build</dt><dd>Built from individual parts, not a kit</dd></div>
     </dl>
   </div>
 
   <article class="article prose">
 
-    <h2><span class="sec-no">1.</span>Why build, not buy</h2>
+    <h2><span class="sec-no">1.</span>Build</h2>
     <p>
-      A Voron 2.4 from parts is a complete mechatronics curriculum in one
-      machine: frame squaring, belt tensioning, four-motor flying-gantry
-      kinematics, wiring harness design, and a firmware stack (Klipper) that
-      rewards actually understanding the hardware under it. Sensorless homing
-      replaces physical endstops with stallguard current sensing on the
-      steppers: fewer parts, cleaner motion, one more thing tuned rather than
-      bolted on.
+      Building a Voron 2.4 from parts covers frame squaring, belt tensioning, the four-motor flying-gantry kinematics, wiring-harness design, and configuration of the Klipper firmware for the specific hardware. Homing is sensorless: instead of physical endstops, the stepper drivers detect a stall (StallGuard) at the end of travel, which removes the endstop switches and their wiring but requires the driver current and sensitivity to be tuned.
     </p>
 
     <figure class="fig">
@@ -78,7 +69,7 @@
 
     <figure class="fig">
       <img src="../assets/img/voron-printing.jpg" alt="Inside the printer enclosure mid-print: toolhead over a carbon-fiber build plate, cable chain overhead, Klipper touchscreen showing 91 percent" loading="lazy">
-      <figcaption><span class="fig-no">FIG 2</span>Mid-print at 91%: the machine printing its own exhaust-filter housing. Self-hosting, in the mechanical sense.</figcaption>
+      <figcaption><span class="fig-no">FIG 2</span>Mid-print at 91%: the printer producing its own exhaust-filter housing.</figcaption>
     </figure>
 
     <figure class="fig">
@@ -93,7 +84,7 @@
 
     <figure class="fig">
       <img src="../assets/img/voron-finished.jpg" alt="The finished enclosed CoreXY printer standing under a desk" loading="lazy">
-      <figcaption><span class="fig-no">FIG 5</span>The finished machine, enclosed and living under the desk.</figcaption>
+      <figcaption><span class="fig-no">FIG 5</span>The finished machine, enclosed, under the desk.</figcaption>
     </figure>
 
     <figure class="fig">
@@ -101,9 +92,9 @@
       <figcaption><span class="fig-no">FIG 6</span>Walkaround of the finished build.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">2.</span>What it feeds</h2>
+    <h2><span class="sec-no">2.</span>Use in other projects</h2>
     <p>
-      Every hardware project on this site has parts that came off this bed:
+      Parts printed on this machine for other projects include:
     </p>
     <ul>
       <li>the <a href="submersivity.html">ESP-DIVE submarine's</a> 3D-printed hull,</li>
@@ -112,8 +103,7 @@
           <a href="rinnegan.html">Rinnegan</a> hardware target.</li>
     </ul>
     <p>
-      That's the honest framing: this machine is infrastructure. It converts
-      CAD into iterations, and iteration speed is the real spec.
+      Having the printer in-house shortens each design iteration from CAD change to physical part.
     </p>
 
   </article>

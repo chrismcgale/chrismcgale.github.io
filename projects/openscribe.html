@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenScribe: open-source voice recorder · mcgale.dev</title>
+  <meta name="description" content="A pocket-card ESP32-S3 voice recorder with a self-hosted transcription pipeline: an open, subscription-free replacement for AI note-taking recorders.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 10</p>
+
+  <div class="project-head">
+    <span class="card-index">10 / HARDWARE + SELF-HOSTED STACK · REV A BRING-UP</span>
+    <h1>OpenScribe</h1>
+    <p class="subtitle">
+      A credit-card-sized voice recorder of my own design, with a self-hosted
+      server that turns its recordings into searchable transcripts. It is an
+      open alternative to subscription AI recorders: the device records to
+      local flash and uploads over WiFi to a gateway I host, and transcription
+      runs on a speech-to-text model of my choice, local or cloud. No part of
+      the system depends on a single vendor.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- waveform → card → transcript lines -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="50" x2="960" y2="50" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M40 50 L 60 38 L 72 62 L 86 28 L 100 72 L 114 40 L 128 58 L 142 46 L 156 54 L 170 50" stroke="var(--amber)" stroke-width="1.4"/>
+        <rect x="230" y="22" width="120" height="56" rx="8" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.4"/>
+        <circle cx="246" cy="36" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+        <circle cx="334" cy="36" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+        <circle cx="246" cy="64" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+        <circle cx="334" cy="64" r="3" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
+        <path d="M370 50 C 450 20, 520 80, 600 50" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="4 3"/>
+        <rect x="620" y="26" width="48" height="48" fill="none" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="700" y1="32" x2="900" y2="32" stroke="var(--ink-soft)" stroke-width="1.2"/>
+        <line x1="700" y1="46" x2="860" y2="46" stroke="var(--ink-soft)" stroke-width="1.2"/>
+        <line x1="700" y1="60" x2="880" y2="60" stroke="var(--amber)" stroke-width="1.2"/>
+        <line x1="700" y1="74" x2="820" y2="74" stroke="var(--ink-soft)" stroke-width="1.2"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Rev A boards fabricated · flash + firmware verified · power bring-up waiting on a cell</dd></div>
+      <div><dt>MCU</dt><dd>ESP32-S3 module · WiFi upload · A/B OTA</dd></div>
+      <div><dt>Audio</dt><dd>PDM MEMS mics (4 populated on prototypes) · Opus encode on-device</dd></div>
+      <div><dt>Power</dt><dd>Single-cell LiPo · BQ24075 charger/power-path · USB-C · deep sleep between sessions</dd></div>
+      <div><dt>Enclosure</dt><dd>79×58×6.8&nbsp;mm printed shell · MagSafe-compatible ring · gasketed mic ports</dd></div>
+      <div><dt>Server</dt><dd>Gateway + diarizer · pluggable STT / LLM / embeddings · ~50 tests</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <figure class="fig">
+      <img src="../assets/img/openscribe-pcb-iso.png" alt="Isometric KiCad 3D render of the black OpenScribe board: ESP32-S3 module with PCB antenna at the top, four ring-shaped MEMS microphone footprints near the corners, JST-SH battery and switch connectors, and the charger and power ICs" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>Rev A, KiCad 3D render. ESP32-S3 module and antenna at the top; the four MEMS mic footprints (the ring-shaped pads) sit near the corners so the shell can port each one to the outside.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">1.</span>Motivation</h2>
+    <p>
+      Commercial AI note-taking recorders are inexpensive to buy, but
+      transcription requires a monthly subscription and the vendor's cloud
+      service. If the vendor stops operating, the device can still record but
+      loses transcription. I wanted the same pocket form factor with every
+      layer open (MIT/Apache-licensed components) and running on hardware I
+      own.
+    </p>
+    <p>
+      The target bill of materials is about $50. Transcription on a local GPU
+      costs a fraction of a cent per audio hour, and even a paid cloud speech
+      API is roughly 10× cheaper than the subscription's effective hourly
+      rate. The speech-to-text backend is configured with a single
+      <code>base_url</code> that uses the OpenAI
+      <code>/v1/audio/transcriptions</code> format, so local faster-whisper,
+      Groq, or OpenAI can be used interchangeably.
+    </p>
+
+    <h2><span class="sec-no">2.</span>The device</h2>
+    <p>
+      The firmware pipeline is capture → encode → store → sync → sleep. PDM
+      microphones feed an Opus encoder, and chunks are written to a
+      power-cut-safe littlefs filesystem. WiFi upload happens only when the
+      battery can afford it, and the board sits in deep sleep otherwise. Updates
+      go over the air to A/B slots, gated by a per-device token. A production
+      overlay adds Secure Boot, flash encryption, and anti-rollback, staged to be
+      burned only when a unit is sealed.
+    </p>
+    <p>
+      The board schematic is generated from code and the layout is fully
+      routed. It passes DRC with zero errors and a clean schematic/layout
+      parity check, and a SPICE suite run on the routed parasitics passes.
+      Every BOM line is sourced from a single assembler. The prototypes have
+      all four microphones populated to allow wake-on-sound and beamforming
+      experiments; production builds would use two.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/openscribe-pcb-top.png" alt="Top-down KiCad render of the OpenScribe PCB" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>Top-side render. The board outline is taken from the same card frame used by the floorplan script and the enclosure CAD, so the two stay consistent.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/openscribe-fit-assembly.png" alt="OpenSCAD fit-check assembly: green PCB and a large flat LiPo cell inside an orange rounded-rectangle shell with screw pedestals" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Fit-check assembly in OpenSCAD: board, cell, wiring and M2 closure pedestals in the 6.8&nbsp;mm-thick shell. This model is used for stack-height checks until a full MCAD model exists.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">3.</span>The server</h2>
+    <p>
+      The gateway and diarizer are code-complete. An upload goes through
+      ingest, reassembly, speech-to-text, and speaker diarization, followed by
+      extraction of key phrases, tasks, and a summary, which are published
+      as a subscribable calendar feed. The server provides full-text search,
+      semantic search over recordings, and a review UI with synchronized
+      audio playback, along with retention policies, token authentication,
+      and TLS certificate pinning to the device. The planned deployment is an
+      always-on Raspberry Pi receiver that passes compute-heavy jobs to a GPU
+      workstation over my private network.
+    </p>
+
+    <h2><span class="sec-no">4.</span>Rev A bring-up</h2>
+    <p>
+      The assembled rev A boards flash and boot the application, but on bench
+      USB power with no battery connected they brown out. The cause is the
+      charger's input-current-limit pins, which are driven by MCU GPIOs that
+      default low; until the firmware configures them, the charger limits
+      input current to <strong>100&nbsp;mA</strong>. The ROM bootloader does
+      not run our code, so flashing and early boot are always limited to
+      100&nbsp;mA, and without a battery to supply current peaks from the
+      radio and flash erase, the supply rail drops out.
+    </p>
+    <p>
+      For rev B, running and flashing from USB-C alone is a requirement. The
+      current limit will be set high in hardware (firmware can still lower
+      it), with a buck-boost regulator, additional bulk capacitance, a USB-UART
+      bridge, and bench test points. Rev A bring-up continues with a battery
+      connected.
+    </p>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="multirotor-uav.html">← 09 · Multirotor UAV</a>
+    <a href="air-quality-node.html">11 · AQI node →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -30,11 +30,7 @@
     <span class="card-index">06 / HARDWARE · PCB DESIGNED, AWAITING FAB</span>
     <h1>Kickbox coach</h1>
     <p class="subtitle">
-      A wearable strike-measurement pod: worn on wrists and feet, it captures
-      the impact transient every time you hit the heavy bag: ±200&nbsp;g
-      accelerometer, ring-buffered around the hit, shipped over BLE to a
-      dashboard that turns raw g-forces into strike force, count, and a
-      target heatmap.
+      A wearable strike-measurement pod, worn on the wrists and ankles, that records the impact transient of each strike on a heavy bag. A ±200&nbsp;g accelerometer is sampled into a ring buffer around each impact, and the data is sent over BLE to a dashboard that reports strike force, count, and a heatmap of impact locations.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -60,11 +56,9 @@
 
   <article class="article prose">
 
-    <h2><span class="sec-no">1.</span>The measurement problem</h2>
+    <h2><span class="sec-no">1.</span>Measurement approach</h2>
     <p>
-      A strike on a heavy bag is a violent, short transient, far beyond the
-      ±16&nbsp;g range of a normal IMU, over in tens of milliseconds. Getting a
-      usable force measurement means two sensors and a memory trick:
+      A strike on a heavy bag produces a short transient, lasting tens of milliseconds, with peak acceleration well beyond the ±16&nbsp;g range of a typical IMU. Measuring it requires two sensors and continuous buffering:
     </p>
     <ul>
       <li>
@@ -76,31 +70,21 @@
         hit: limb orientation, swing, retraction,
       </li>
       <li>
-        a <strong>RAM ring buffer</strong> capturing continuously, so when the
-        impact trigger fires, the pod already has ~50&nbsp;ms of pre-impact
-        signal and keeps the following ~200&nbsp;ms. The transient is never
-        missed because capture started before the hit.
+        a <strong>RAM ring buffer</strong> that records continuously, so that when the impact trigger fires the pod already holds about 50&nbsp;ms of pre-impact data and then records the following 200&nbsp;ms.
       </li>
     </ul>
 
     <h2><span class="sec-no">2.</span>The board</h2>
     <p>
-      The PCB (rev frozen) is built around a <strong>Raytac MDBT42Q</strong>
-      module, an nRF52832 with the antenna and RF layout already certified,
-      which keeps the radio risk out of a small board. Power is a single-cell
+      The PCB (design frozen) is built around a <strong>Raytac MDBT42Q</strong> module, an nRF52832 with a pre-certified antenna and RF layout, which avoids doing RF layout on a small board. Power is a single-cell
       Li-Po chain: <strong>MCP73831</strong> charger,
       <strong>DW01A + FS8205A</strong> battery protection, and an
-      <strong>MCP1700-3302</strong> LDO. Programming and charging come in
-      through a <strong>5-pad pogo interface</strong>; no connectors to rip
-      out of a device that gets punched for a living. One board design serves
-      all four limbs.
+      <strong>MCP1700-3302</strong> LDO. Programming and charging use a <strong>5-pad pogo interface</strong>, so there is no connector exposed to impact. The same board is used on all four limbs.
     </p>
     <p>
-      Honest status: the design is frozen
+      Status: the design is frozen
       (<a href="../assets/docs/strikepod-schematic.pdf">schematic PDF ↗</a>),
-      but boards are still to be ordered and the ADXL375 placed; no strikes
-      have been captured on real hardware yet. This page will grow result data
-      when the hardware exists, not before.
+      but boards are still to be ordered and the ADXL375 placed; no strikes have been captured on hardware yet. Results will be added once boards are built.
     </p>
 
     <figure class="fig">
@@ -115,16 +99,12 @@
 
     <figure class="fig">
       <img src="../assets/img/kickbox-pcb-bottom.png" alt="KiCad render of the PCB bottom side carrying the sensor and power ICs" loading="lazy">
-      <figcaption><span class="fig-no">FIG 3</span>Bottom side: the working half. ADXL375 and ICM-42688-P sensor placements plus the charge/protect/regulate power chain.</figcaption>
+      <figcaption><span class="fig-no">FIG 3</span>Bottom side: ADXL375 and ICM-42688-P sensor placements plus the charge/protect/regulate power chain.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">3.</span>The product layer: dashboard</h2>
+    <h2><span class="sec-no">3.</span>Dashboard</h2>
     <p>
-      The pod is the sensor; the <strong>dashboard</strong> is the product.
-      Captured transients stream over BLE and land as training data: strike
-      force per hit, strike count over a session, and a heatmap of where and
-      how hard you're hitting. The goal is a coach's eye, quantified:
-      is your cross actually harder this month, or does it just feel that way?
+      Captured transients are sent over BLE to a <strong>dashboard</strong> and logged as training data: strike force per hit, strike count per session, and a heatmap of impact location and force. The aim is to let an athlete track changes in strike force over weeks of training.
     </p>
 
     <figure class="fig fig--todo">
@@ -138,9 +118,7 @@
     <h2><span class="sec-no">4.</span>Roadmap</h2>
     <ul>
       <li>
-        <strong>OAK-D stereo-inertial fusion</strong>: fuse pod IMU data with
-        stereo vision so strikes get full 3D context, not just the impact
-        signature.
+        <strong>OAK-D stereo-inertial fusion</strong>: fuse pod IMU data with stereo vision to capture the 3D motion of each strike as well as the impact.
       </li>
       <li>
         <strong>SWIM waveform visualization</strong>: a sequential-wave
@@ -151,12 +129,12 @@
 
     <figure class="fig">
       <img src="../assets/img/kickbox-swim-rig.jpg" alt="A motorized rig on the floor: aluminum pole with an LED strip, drive wheels at each end, a power bank and a small control board" loading="lazy">
-      <figcaption><span class="fig-no">FIG 5</span>One of the lab's motorized SWIM rigs (Sequential Wave Imprinting Machine): an LED array swept through space imprints waveforms onto long-exposure views. The target visual language for strike data.</figcaption>
+      <figcaption><span class="fig-no">FIG 5</span>One of the lab's motorized SWIM rigs (Sequential Wave Imprinting Machine): an LED array swept through space imprints waveforms onto long-exposure views. This is the intended visualization for strike data.</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/kickbox-swim-lightpainting.jpg" alt="Long-exposure photograph of a green waveform drawn in mid-air with a swept LED array" loading="lazy">
-      <figcaption><span class="fig-no">FIG 6</span>SWIM in action: a waveform imprinted in mid-air on a long exposure. Strike transients rendered this way is the roadmap's end state.</figcaption>
+      <figcaption><span class="fig-no">FIG 6</span>SWIM in action: a waveform imprinted in mid-air on a long exposure. The roadmap goal is to render strike transients this way.</figcaption>
     </figure>
 
   </article>

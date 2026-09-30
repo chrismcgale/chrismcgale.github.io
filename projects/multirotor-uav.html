@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multirotor UAV modelling &amp; control · mcgale.dev</title>
+  <meta name="description" content="A quadrotor courier for Arctic post-to-post deliveries: Newton-Euler dynamics and rotor mixing built in Simulink, a cascaded controller with nonlinear attitude inversion, and a simulated multi-leg mission, plus multirotor hover and forward-flight performance modelling.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 09</p>
+
+  <div class="project-head">
+    <span class="card-index">09 / COURSEWORK · AER1216</span>
+    <h1>Multirotor UAV modelling &amp; control</h1>
+    <p class="subtitle">
+      The multirotor part of the <a href="fixed-wing-uav.html">Arctic UAS proposal</a>: a <strong>quadrotor courier</strong> for carrying packages between remote posts. We derived and implemented the vehicle dynamics in Simulink (rigid-body motion, rotor thrust and torque, gyroscopic coupling), designed a cascaded controller that computes attitude commands without small-angle approximations, and flew a multi-leg delivery route in simulation. A separate assignment modelled multirotor hover and forward-flight power using momentum theory.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- X-quad → straight leg → semicircle → zigzag home -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="86" x2="960" y2="86" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M60 30 L 120 76 M120 30 L 60 76" stroke="var(--ink-soft)" stroke-width="1.3"/>
+        <circle cx="60" cy="30" r="9" fill="none" stroke="var(--amber)" stroke-width="1.2"/>
+        <circle cx="120" cy="30" r="9" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+        <circle cx="60" cy="76" r="9" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
+        <circle cx="120" cy="76" r="9" fill="none" stroke="var(--amber)" stroke-width="1.2"/>
+        <rect x="82" y="45" width="16" height="16" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.3"/>
+        <path d="M180 30 L 520 30" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <path d="M520 30 A 26 26 0 0 1 520 82" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <path d="M520 82 L 600 56 L 760 56 L 900 30" stroke="var(--ink-soft)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <circle cx="180" cy="30" r="4" fill="var(--ink)"/>
+        <rect x="516" y="26" width="8" height="8" fill="var(--ink-soft)"/>
+        <rect x="516" y="78" width="8" height="8" fill="var(--ink-soft)"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Complete · AER1216, Fundamentals of UAS (Fall 2025) · team design project</dd></div>
+      <div><dt>Brief</dt><dd>Post-to-post courier · take off to 30.48&nbsp;m · 800&nbsp;m legs · straight, semicircular and zigzag paths</dd></div>
+      <div><dt>Budget</dt><dd>$2,000 CAD complete system · battery ≤2,600&nbsp;mAh</dd></div>
+      <div><dt>Model</dt><dd>Newton-Euler 6-DoF + rotor thrust/torque mixing · gyroscopic term · MATLAB / Simulink</dd></div>
+      <div><dt>Control</dt><dd>Cascaded position → attitude → body-rate PID · nonlinear atan2 attitude inversion</dd></div>
+      <div><dt>Team</dt><dd>with Feiyang Wu &amp; Clarence Zhang</dd></div>
+      <div><dt>Reports</dt><dd><a href="../assets/docs/aer1216-performance.pdf">performance ↗</a></dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <h2><span class="sec-no">1.</span>The brief</h2>
+    <p>
+      The course project asked for two low-cost UAS designs for Arctic
+      operations. The <a href="fixed-wing-uav.html">fixed-wing patroller</a>
+      handles long-range reconnaissance. The multirotor is the <strong>courier</strong>: it takes off and lands vertically at posts with no runway and follows a specified path between them. Its budget covers the complete system, $2,000 against the patroller's $400 for propulsion.
+    </p>
+    <table class="spec">
+      <thead><tr><th>Requirement</th><th>Target</th><th>Design impact</th></tr></thead>
+      <tbody>
+        <tr><td>Cost</td><td>≤$2,000 CAD complete system</td><td>Flight controller, ESCs, motors, props and batteries all count</td></tr>
+        <tr><td>Battery</td><td>≤2,600&nbsp;mAh</td><td>Limits endurance, which depends mainly on hover power</td></tr>
+        <tr><td>Motors</td><td>0.1&nbsp;kg each (given)</td><td>Fixed mass the airframe has to carry</td></tr>
+        <tr><td>Takeoff</td><td>Vertical, to 30.48&nbsp;m (100&nbsp;ft)</td><td>No runway at remote posts</td></tr>
+        <tr><td>Route</td><td>Straight 800&nbsp;m west, semicircle south to a second post, zigzag home, land</td><td>Three path types, scored on following accuracy</td></tr>
+        <tr><td>Model</td><td>Derive and implement the full dynamics</td><td>The dynamics had to be derived and built, not taken from a library block</td></tr>
+      </tbody>
+    </table>
+
+    <h2><span class="sec-no">2.</span>Vehicle dynamics</h2>
+    <p>
+      The course supplied a Simulink model with empty subsystems. We derived and implemented the dynamics in the NED convention used by the rotor model. The model computes body rates from torques, Euler angles from body rates, and a rotation matrix from the Euler angles that projects thrust into the Earth frame:
+    </p>
+    <ul>
+      <li>
+        <strong>Rotational:</strong> Euler's equations for the body rates
+        p, q, r, driven by the rotor torques
+        τ<sub>φ</sub>, τ<sub>θ</sub>, τ<sub>ψ</sub> plus the gyroscopic
+        torque τ<sub>g</sub> from the spinning rotors' inertia
+        J<sub>r</sub>.
+      </li>
+      <li>
+        <strong>Kinematic:</strong> body rates mapped to Euler-angle rates
+        through the full (not small-angle) transformation matrix, then
+        integrated to φ, θ, ψ.
+      </li>
+      <li>
+        <strong>Translational:</strong> collective thrust T rotated through
+        R(φ,&nbsp;θ,&nbsp;ψ) into x, y, z accelerations, with gravity along
+        +z, then integrated twice.
+      </li>
+    </ul>
+
+    <figure class="fig">
+      <img src="../assets/img/mr-dynamics.png" alt="Simulink block diagram of the quadrotor dynamics: torque inputs feed a pqr_gen block producing body rates, then a phi_theta_psi block producing Euler angles, then an R3 rotation block whose outputs combine with thrust to give x, y and z" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>The dynamics subsystem: torques → body rates (pqr_gen) → Euler angles → rotation matrix R3 → thrust projected into Earth-frame x, y, z.</figcaption>
+    </figure>
+
+    <p>
+      The rotor model is the standard X-quadrotor mixing. Each rotor makes
+      thrust k·ω<sub>i</sub>² and reaction torque b·ω<sub>i</sub>², so
+      collective thrust is T&nbsp;=&nbsp;kΣω<sub>i</sub>², roll and pitch
+      torques are L·k times differences of opposite rotors' ω², and yaw torque
+      is the signed sum of the reaction torques. The rotor-dynamics block runs
+      this backwards: from commanded thrust and angular accelerations it
+      solves for each ω<sub>i</sub>², takes the square root to get rotor
+      speeds, and uses those speeds for the gyroscopic term. The course
+      offered placeholder coefficients (k&nbsp;=&nbsp;0.09, b&nbsp;=&nbsp;0.07)
+      if no component data was available; we used k&nbsp;=&nbsp;3×10⁻⁶ and b&nbsp;=&nbsp;1×10⁻⁷ (table below).
+    </p>
+
+    <table class="spec">
+      <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Mass m</td><td>2.00&nbsp;kg</td></tr>
+        <tr><td>Inertia I<sub>xx</sub>, I<sub>yy</sub>, I<sub>zz</sub></td><td>0.10, 0.10, 0.20&nbsp;kg·m²</td></tr>
+        <tr><td>Arm length L</td><td>0.25&nbsp;m</td></tr>
+        <tr><td>Thrust coefficient k</td><td>3×10⁻⁶&nbsp;N·s²</td></tr>
+        <tr><td>Drag-torque coefficient b</td><td>1×10⁻⁷&nbsp;N·m·s²</td></tr>
+        <tr><td>Rotor inertia J<sub>r</sub></td><td>1×10⁻⁴&nbsp;kg·m²</td></tr>
+      </tbody>
+    </table>
+
+    <h2><span class="sec-no">3.</span>Flight control</h2>
+    <p>
+      The controller is a three-level cascade: position errors command
+      accelerations, accelerations command attitude, and attitude errors
+      command body-rate changes that go to the rotor mixer.
+    </p>
+    <ul>
+      <li>
+        <strong>Altitude:</strong> PI on z, producing a vertical acceleration
+        command.
+      </li>
+      <li>
+        <strong>Lateral:</strong> separate PID loops on x and y, heavily
+        damped to avoid overshoot at the corners.
+      </li>
+      <li>
+        <strong>Yaw:</strong> PD producing a yaw-rate command.
+      </li>
+      <li>
+        <strong>Roll and pitch:</strong> inner PD loops with derivative on
+        measurement, so a setpoint step doesn't cause a derivative kick.
+      </li>
+      <li>
+        <strong>Limits:</strong> acceleration commands saturate at
+        ±2&nbsp;m/s², body rates at 1.5&nbsp;rad/s.
+      </li>
+    </ul>
+    <p>
+      Roll, pitch, yaw, thrust and lateral acceleration are coupled, and a common simplification is to linearize that coupling around hover. We used the full nonlinear relations instead. The required thrust is the magnitude of the full commanded acceleration,
+      T<sub>des</sub>&nbsp;=&nbsp;m·√(ẍ<sub>c</sub>²&nbsp;+&nbsp;ÿ<sub>c</sub>²&nbsp;+&nbsp;(g&nbsp;+&nbsp;z̈<sub>c</sub>)²).
+      Pitch and roll setpoints come from <code>atan2</code> of the lateral
+      acceleration command, rotated into the vehicle's heading by ψ,
+      against that thrust. The delivery route does not require large attitude angles, but the controller remains valid away from hover.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/mr-controller.png" alt="Simulink block diagram of the position and attitude controller: x, y and z controller blocks feed product, cosine and sine blocks and two atan2 blocks that produce pitch and roll setpoints for theta and phi controllers, with saturation blocks on each output" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>The controller subsystem. Position loops (left) produce acceleration commands; the cos/sin(ψ) products and the two <code>atan2</code> blocks turn them into pitch and roll setpoints; saturated attitude loops (right) output rate commands to the mixer.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">4.</span>Flying the route</h2>
+    <p>
+      The mission is scripted as a waypoint stream: climb vertically to
+      30.48&nbsp;m, hover, cruise at 40&nbsp;m along a straight 800&nbsp;m leg
+      west, sweep a semicircle south to the second post with the heading
+      turning to follow the path, return on a zigzag of diagonal and straight
+      legs, then descend and land at the base. A single
+      <code>wait_time</code> parameter scales the reference timing, which is
+      how cruise speed is set. The path is converted to Simulink time series
+      and the full nonlinear model flies it closed-loop.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/mr-path-3d.png" style="max-width: 460px; margin: 0 auto;" alt="3D MATLAB plot of the planned route in green and the simulated trajectory in blue: a vertical climb, a long straight leg, a semicircle and a zigzag back" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Planned route (green) and simulated trajectory (blue). The plot labels every axis "1/10&nbsp;m", which is true of x and y (the planner's units) but not z, which is in metres. In these units the semicircle in this run spans 400&nbsp;m north to south.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/mr-mission-states.png" alt="Six MATLAB subplots over the full mission: x, y and z position and roll, pitch and yaw angle, actual in blue against desired in red dashed. Position tracks closely throughout; roll and pitch stay within a few degrees except at the start and at the return legs" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>Position and attitude over the whole mission, actual (blue) against commanded (red dashed). Position tracks the reference closely on every leg, and altitude holds at 40&nbsp;m (−40 in NED). Roll and pitch stay within a few degrees, with short transients at takeoff and where the route turns into the zigzag. As in FIG&nbsp;3, the x and y panels are in 0.1&nbsp;m planner units despite the "(m)" label.</figcaption>
+    </figure>
+
+    <p>
+      Two features of FIG&nbsp;4 need explanation. First, the yaw
+      panel's apparent divergence from the midpoint on is angle wrapping, not
+      a tracking error: the reference heading is unwrapped and keeps climbing
+      past 180°, while the measured angle wraps into ±180°. Every offset in
+      that panel is exactly 360° (320° commanded reads as −40° measured, for
+      example). Second, the attitude transients cluster exactly where the path
+      has corners, and the heavy lateral damping and the ±2&nbsp;m/s² acceleration limit were chosen to limit them.
+    </p>
+
+    <h2><span class="sec-no">5.</span>Hover and forward-flight power</h2>
+    <p>
+      The companion performance assignment sized a multirotor from the
+      power side: a 2&nbsp;kg hexarotor (1&nbsp;kg vehicle plus 1&nbsp;kg
+      payload) on six APC 8×3.8 slow-flyer propellers at sea level. The airframe differs from the courier, but the same method applies to any multirotor:
+    </p>
+    <ul>
+      <li>
+        <strong>Hover power:</strong> ideal actuator-disk theory gives
+        125.87&nbsp;W. Interpolating UIUC static-thrust data for the real
+        propeller (7,021&nbsp;RPM, C<sub>T</sub>&nbsp;=&nbsp;0.1143,
+        C<sub>P</sub>&nbsp;=&nbsp;0.0481) gives 196.28&nbsp;W, a figure of merit
+        of 64.1%.
+      </li>
+      <li>
+        <strong>At the battery:</strong> with 70% motor and 80% ESC
+        efficiency, hover needs 350.5&nbsp;W of electrical power.
+      </li>
+      <li>
+        <strong>Endurance:</strong> a time-marched battery discharge model,
+        run from the motor's torque, current (5.06&nbsp;A) and voltage
+        (7.63&nbsp;V) at 735.2&nbsp;rad/s, gives <strong>174&nbsp;s</strong>
+        of hover on 1,162&nbsp;mAh.
+      </li>
+      <li>
+        <strong>Forward flight:</strong> solving the momentum equation for
+        inflow at each airspeed shows induced power falling as speed rises.
+        Total power reaches a minimum of about 67&nbsp;W near 15&nbsp;m/s, roughly half the ideal hover power.
+      </li>
+    </ul>
+
+    <figure class="fig">
+      <img src="../assets/img/mr-hexa-power.png" alt="Four dark-theme MATLAB plots against forward velocity from 0 to 20 m/s: thrust rising slightly from 19.62 to 19.69 N, induced power falling from about 126 W to 40 W, total power falling to a minimum near 67 W at about 15 m/s then rising, and power per unit velocity falling steeply" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>Forward-flight power required from momentum theory. Total power (bottom left) reaches a minimum near 15&nbsp;m/s, so moderate forward flight requires less power than hover. A κ&nbsp;≈&nbsp;1.15 correction for non-uniform inflow, not applied here, would raise the induced-power estimates.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">6.</span>Toolchain</h2>
+    <ul>
+      <li><strong>Simulink</strong>: rigid-body dynamics, rotor mixing, cascaded controller, time-series-driven mission</li>
+      <li><strong>MATLAB</strong>: waypoint planner, Euler-kinematics helper, 2D/3D path plotting, performance and battery models</li>
+      <li><strong>UIUC Propeller Data Site</strong>: static C<sub>T</sub> / C<sub>P</sub> for the hover operating point</li>
+    </ul>
+
+    <h2><span class="sec-no">7.</span>Credits</h2>
+    <p>
+      Team project with <strong>Feiyang Wu</strong> and
+      <strong>Clarence Zhang</strong>. The fixed-wing half of the same
+      proposal is <a href="fixed-wing-uav.html">project 08</a>; the
+      quadrotor LQR / MPC work from the companion course is
+      <a href="quadrotor-control.html">project 05</a>.
+    </p>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="fixed-wing-uav.html">← 08 · Fixed-wing UAV</a>
+    <a href="openscribe.html">10 · OpenScribe →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

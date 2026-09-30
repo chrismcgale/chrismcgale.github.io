@@ -4,13 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quadrotor control &amp; visual odometry · mcgale.dev</title>
-  <meta name="description" content="PID, LQR, and MPC controllers tuned head-to-head for quadrotor stabilization and tracking, plus a RANSAC-hardened visual-odometry front end.">
+  <meta name="description" content="AER1217 lab work: PD, LQR, and MPC position controllers compared on a quadrotor tracking task, target detection and localization from flight imagery, and stereo visual odometry with RANSAC.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles.css">
   <script src="../main.js"></script>
+  <style>
+    .bar-chart { width: 100%; height: auto; display: block; }
+    .bar-chart .grid line { stroke: var(--line); stroke-width: 1; }
+    .bar-chart text { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+    .bar-chart .row-label text { fill: var(--ink); }
+    .bar-chart .value-label text { fill: var(--ink); font-weight: 700; }
+    .bar-chart .bar-ctx { fill: var(--ink-soft); }
+    .bar-chart .bar-hi { fill: var(--amber); }
+    .bar-chart path:hover { opacity: 0.8; }
+    [data-theme="dark"] .bar-chart .bar-ctx { fill: var(--ink-faint); }
+  </style>
 </head>
 <body>
 <div class="page">
@@ -30,10 +41,10 @@
     <span class="card-index">05 / COURSEWORK</span>
     <h1>Quadrotor control &amp; visual odometry</h1>
     <p class="subtitle">
-      The AER1217 lab series, end to end: PID, LQR, and MPC tuned against the
-      same quadrotor tracking tasks; a target detection and localization
-      pipeline run on real flight imagery under Vicon; and a stereo
-      visual-odometry front end with RANSAC outlier rejection.
+      Work from the AER1217 lab series: PD, LQR, and MPC position
+      controllers compared on the same quadrotor tracking task; target
+      detection and localization from flight imagery recorded under Vicon;
+      and a stereo visual-odometry pipeline with RANSAC outlier rejection.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -50,7 +61,7 @@
 
     <dl class="meta-block">
       <div><dt>Status</dt><dd>Complete · AER1217 labs 2, 3, 4</dd></div>
-      <div><dt>Control</dt><dd>PID · LQR · MPC in Crazyflie sim (PyBullet)</dd></div>
+      <div><dt>Control</dt><dd>PD · LQR · MPC in Crazyflie sim (PyBullet)</dd></div>
       <div><dt>Aerial vision</dt><dd>Target detection + localization, real flights under Vicon</dd></div>
       <div><dt>Perception</dt><dd>Stereo VO on KITTI, RANSAC outlier rejection</dd></div>
       <div><dt>Reports</dt><dd><a href="../assets/docs/aer1217-lab2-report.pdf">control ↗</a> · <a href="../assets/docs/aer1217-lab3-report.pdf">vision ↗</a> · <a href="../assets/docs/aer1217-lab4-report.pdf">VO ↗</a></dd></div>
@@ -59,102 +70,244 @@
 
   <article class="article prose">
 
-    <h2><span class="sec-no">1.</span>Controllers, head-to-head</h2>
+    <h2><span class="sec-no">1.</span>Controller comparison</h2>
     <p>
-      The point of implementing all three on the same platform is the
-      comparison. Each controller was tuned for the same quadrotor
-      stabilization and trajectory-tracking tasks:
+      Three position controllers were implemented and compared on the same
+      trajectory-tracking task:
     </p>
     <ul>
       <li>
-        <strong>PID</strong>, the baseline: per-axis loops, fast to tune,
-        no model required, and a reference point for what the model-based
-        methods buy you.
+        <strong>PD</strong>: per-axis position and velocity feedback with
+        acceleration feedforward. No model required.
       </li>
       <li>
-        <strong>LQR</strong>: optimal state feedback on the linearized
-        dynamics; one principled trade-off (Q vs. R) instead of a dozen gains.
+        <strong>LQR</strong>: optimal state feedback on a linearized model,
+        tuned through the Q and R weights rather than individual gains.
       </li>
       <li>
-        <strong>MPC</strong>: receding-horizon optimization with constraints,
-        paying compute for the ability to anticipate the trajectory rather than
-        chase it.
+        <strong>MPC</strong>: a constrained quadratic program solved over a
+        receding horizon at every control step.
       </li>
     </ul>
 
     <p>
-      Tuning was systematic rather than by feel: the PD baseline's gains came
-      from a full sweep over K<sub>p</sub>×K<sub>d</sub>, scoring closed-loop
-      tracking RMS in the PyBullet Crazyflie simulation.
+      The task is a 3&nbsp;m-radius circle at 1&nbsp;m altitude, flown at
+      4&nbsp;m/s for 100&nbsp;s (about 21 laps) in the PyBullet Crazyflie
+      simulation. We restructured the course code so that all three
+      controllers inherit from one base class, which converts a desired
+      acceleration into collective thrust and an attitude command. PD and LQR
+      supply position and velocity gains; MPC computes the acceleration
+      command directly. A batch runner sweeps controller parameters from a
+      YAML file and logs per-axis RMS error, maximum error, and laps completed
+      for each run.
+    </p>
+
+    <p>
+      PD gains were selected by sweeping several hundred
+      K<sub>p</sub>×K<sub>d</sub> combinations and ranking them by total
+      tracking RMS.
     </p>
 
     <figure class="fig">
       <img src="../assets/img/quad-pd-sweep.png" alt="3D surface of tracking RMS over the PD gain grid, showing the low-error basin" loading="lazy">
-      <figcaption><span class="fig-no">FIG 1</span>PD gain sweep: log tracking RMS over the K<sub>p</sub>×K<sub>d</sub> grid; the basin picks the operating point.</figcaption>
+      <figcaption><span class="fig-no">FIG 1</span>PD gain sweep: log<sub>10</sub> of total tracking RMS over the K<sub>p</sub>×K<sub>d</sub> grid.</figcaption>
     </figure>
+
+    <h3>Reference speed ramp</h3>
+    <p>
+      The best PD gains from the first sweep (K<sub>p</sub>&nbsp;=&nbsp;8,
+      K<sub>d</sub>&nbsp;=&nbsp;2) gave 0.26&nbsp;m RMS with a 1.3&nbsp;m
+      maximum error, dominated by the start of the run. The vehicle starts at
+      rest while the reference circle requires 4&nbsp;m/s of tangential speed
+      from t&nbsp;=&nbsp;0, so the controller begins with a large velocity
+      error. We added a speed ramp: the reference angular rate increases
+      linearly to its full value over 2&nbsp;s. The reference angle is the
+      integral of that rate (θ&nbsp;=&nbsp;ω<sub>max</sub>t²/2T during the
+      ramp), and the acceleration feedforward includes the tangential term
+      r·α as well as the centripetal term. With the ramp in place, a second
+      sweep selected K<sub>p</sub>&nbsp;=&nbsp;33,
+      K<sub>d</sub>&nbsp;=&nbsp;11, giving 0.076&nbsp;m RMS over 21.0 laps
+      (21.2 without the ramp).
+    </p>
+
+    <h3>LQR and MPC</h3>
+    <p>
+      <strong>LQR</strong> models each axis as a double integrator (state
+      [position, velocity], input acceleration) and solves the continuous
+      algebraic Riccati equation for one position gain and one velocity gain.
+      The same gains are used for x and y, with an additional scale factor on
+      z to account for gravity acting on the vertical axis. We swept 40
+      weightings; the best was Q&nbsp;=&nbsp;diag(200,&nbsp;40),
+      R&nbsp;=&nbsp;0.3, with a z scale of 1.5.
+    </p>
+    <p>
+      <strong>MPC</strong> uses a discrete-time 3-D double integrator (six
+      states, three acceleration inputs) and solves a quadratic program at
+      every control step using cvxpy with the CLARABEL solver. The horizon is
+      20 steps of 20&nbsp;ms (0.4&nbsp;s), the terminal cost weight is 10×
+      the stage cost, and the constraints limit acceleration to
+      10&nbsp;m/s² laterally and 15&nbsp;m/s² vertically and speed to
+      6&nbsp;m/s. The first input of the solution is applied and the problem
+      is re-solved at the next step. If the solver fails, the controller
+      falls back to a fixed-gain PD law. We swept 31 weightings.
+    </p>
+
+    <figure class="fig">
+      <svg class="bar-chart" viewBox="0 0 640 238" role="img" aria-labelledby="ctrl-chart-title ctrl-chart-desc">
+        <title id="ctrl-chart-title">Best total tracking RMS per controller configuration</title>
+        <desc id="ctrl-chart-desc">PD without the speed ramp 0.262 m; MPC without the ramp 0.128 m; PD with the ramp 0.076 m; LQR with the ramp 0.078 m; MPC with the ramp 0.066 m, the best.</desc>
+        <g class="grid">
+          <line x1="200" y1="10" x2="200" y2="200"/>
+          <line x1="335.7" y1="10" x2="335.7" y2="200"/>
+          <line x1="471.4" y1="10" x2="471.4" y2="200"/>
+        </g>
+        <g class="axis-label">
+          <text x="200" y="218" text-anchor="middle">0</text>
+          <text x="335.7" y="218" text-anchor="middle">0.10</text>
+          <text x="471.4" y="218" text-anchor="middle">0.20</text>
+          <text x="420" y="234" text-anchor="middle">total tracking RMS (m) · lower is better</text>
+        </g>
+        <g class="row-label">
+          <text x="190" y="34" text-anchor="end">PD · no ramp</text>
+          <text x="190" y="72" text-anchor="end">MPC · no ramp</text>
+          <text x="190" y="110" text-anchor="end">PD · ramp</text>
+          <text x="190" y="148" text-anchor="end">LQR · ramp</text>
+          <text x="190" y="186" text-anchor="end">MPC · ramp</text>
+        </g>
+        <g>
+          <path class="bar-ctx" d="M200 20 H551.2 Q555.2 20 555.2 24 V40 Q555.2 44 551.2 44 H200 Z"><title>PD, K_p 8 / K_d 2, no ramp: 0.262 m RMS, 1.300 m max</title></path>
+          <path class="bar-ctx" d="M200 58 H369.6 Q373.6 58 373.6 62 V78 Q373.6 82 369.6 82 H200 Z"><title>MPC, Q_pos 10, no ramp: 0.128 m RMS, 1.295 m max</title></path>
+          <path class="bar-ctx" d="M200 96 H298.9 Q302.9 96 302.9 100 V116 Q302.9 120 298.9 120 H200 Z"><title>PD, K_p 33 / K_d 11, ramp: 0.076 m RMS, 0.162 m max</title></path>
+          <path class="bar-ctx" d="M200 134 H301.6 Q305.6 134 305.6 138 V154 Q305.6 158 301.6 158 H200 Z"><title>LQR, Q diag(200, 40), R 0.3, ramp: 0.078 m RMS, 0.130 m max</title></path>
+          <path class="bar-hi" d="M200 172 H285.2 Q289.2 172 289.2 176 V192 Q289.2 196 285.2 196 H200 Z"><title>MPC, R 0.2, ramp: 0.066 m RMS, 0.132 m max</title></path>
+        </g>
+        <g class="value-label">
+          <text x="563" y="36">0.262</text>
+          <text x="381" y="74">0.128</text>
+          <text x="311" y="112">0.076</text>
+          <text x="314" y="150">0.078</text>
+          <text x="297" y="188" class="value-hi">0.066</text>
+        </g>
+      </svg>
+      <figcaption><span class="fig-no">FIG 2</span>Best run for each configuration, total tracking RMS over the 100&nbsp;s, 4&nbsp;m/s circle. With the speed ramp, MPC has the lowest error and LQR is level with tuned PD. Hovering over a bar shows its parameters.</figcaption>
+    </figure>
+
+    <table class="spec">
+      <thead>
+        <tr><th>Best run</th><th>Total RMS</th><th>Max error</th><th>x / y / z RMS</th><th>Laps</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PD · K<sub>p</sub> 8, K<sub>d</sub> 2 · no ramp</td><td>0.262&nbsp;m</td><td>1.300&nbsp;m</td><td>0.171 / 0.187 / 0.067</td><td>21.23</td></tr>
+        <tr><td>MPC · Q<sub>pos</sub> 10 · no ramp</td><td>0.128&nbsp;m</td><td>1.295&nbsp;m</td><td>0.050 / 0.106 / 0.050</td><td>21.22</td></tr>
+        <tr><td>PD · K<sub>p</sub> 33, K<sub>d</sub> 11 · ramp</td><td>0.076&nbsp;m</td><td>0.162&nbsp;m</td><td>0.055 / 0.049 / 0.016</td><td>21.01</td></tr>
+        <tr><td>LQR · Q diag(200, 40), R 0.3 · ramp</td><td>0.078&nbsp;m</td><td>0.130&nbsp;m</td><td>0.056 / 0.052 / 0.015</td><td>21.01</td></tr>
+        <tr><td><strong>MPC · R 0.2 · ramp</strong></td><td><strong>0.066&nbsp;m</strong></td><td>0.132&nbsp;m</td><td>0.044 / 0.038 / 0.031</td><td>21.01</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Without the speed ramp, the maximum error exceeded 1.2&nbsp;m for both
+      PD and MPC. With the ramp, all three controllers stayed below
+      0.17&nbsp;m, so the reference trajectory had a larger effect on the
+      result than the choice of controller.
+    </p>
+    <p>
+      LQR performed about the same as tuned PD: 3% higher RMS error and 20%
+      lower maximum error. This is expected, since LQR on a double-integrator
+      model produces a proportional-derivative law; the difference is that
+      the gains follow from the Q and R weights, and a competitive result was
+      reached with 40 runs rather than several hundred.
+    </p>
+    <p>
+      MPC gave the lowest error, 13% below tuned PD. The improvement is in the
+      horizontal plane (x and y RMS 20% and 22% lower), which is consistent
+      with the 0.4&nbsp;s horizon anticipating the curvature of the path.
+      Altitude error was higher than with PD (0.031 against 0.016&nbsp;m).
+      Two changes we identified but did not test are a penalty on the rate of
+      change of the input and a prediction model that includes attitude
+      dynamics.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/quad-lqr-errors.png" alt="Four panels of LQR tracking error over 100 seconds: x and y errors oscillate within about plus or minus 0.15 m once per lap, z error sits about 2 cm low, yaw error within about 0.2 rad" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>LQR tracking error, x / y / z / yaw, over a full run. The x and y error is periodic with each lap, indicating a lag behind the moving reference.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/quad-mpc-errors.png" alt="Four panels of MPC tracking error over 100 seconds: x and y errors within about plus or minus 0.1 m, z error about 2 cm low, yaw error within about 0.2 rad" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>MPC tracking error on the same run length. The periodic x and y error is smaller than with LQR (0.050 / 0.046&nbsp;m RMS against 0.070 / 0.067&nbsp;m in these runs).</figcaption>
+    </figure>
+
+    <p>
+      Lab 2 was completed with <strong>Dejan Plavsic</strong> and
+      <strong>Mohsen Movahedi</strong>. The full write-up, including the
+      geometric thrust/attitude derivation, is in the
+      <a href="../assets/docs/aer1217-lab2-report.pdf">control report</a>.
+    </p>
 
     <h2><span class="sec-no">2.</span>Target detection &amp; localization</h2>
     <p>
-      The vision lab: detect ground targets from a quadrotor's downward camera
-      during real flights, then estimate where each target actually is. The
-      detection front end is a classical pipeline (grayscale, adaptive
-      threshold with morphological cleanup, external contours, geometric
-      filtering), which keeps it fast and fully debuggable frame by frame.
+      The vision lab required detecting ground targets in images from a
+      quadrotor's downward-facing camera, recorded during real flights, and
+      estimating each target's position. Detection uses a classical pipeline
+      (grayscale conversion, adaptive thresholding with morphological
+      cleanup, external contours, and geometric filtering), which is fast and
+      can be inspected frame by frame.
     </p>
 
     <figure class="fig">
       <img src="../assets/img/quad-target-pipeline.png" alt="Four-panel contour detection pipeline: grayscale input, adaptive threshold, external contours, filtered detections" loading="lazy">
-      <figcaption><span class="fig-no">FIG 2</span>Detection pipeline on a single flight frame: grayscale, adaptive threshold, contours, filtered detections.</figcaption>
+      <figcaption><span class="fig-no">FIG 5</span>Detection pipeline on a single flight frame: grayscale, adaptive threshold, contours, filtered detections.</figcaption>
     </figure>
 
     <p>
       Per-frame detections are back-projected through the camera model into
       the Vicon world frame, clustered per target, and averaged into position
-      estimates with uncertainty. Hundreds of detections per target collapse
-      into centimeter-scale estimates.
+      estimates with uncertainty. Each target is observed between 68 and 682
+      times, and the averaged estimates are at centimeter scale.
     </p>
 
     <figure class="fig">
       <img src="../assets/img/quad-target-frames.png" alt="Grid of six flight frames, one representative detection per target" loading="lazy">
-      <figcaption><span class="fig-no">FIG 3</span>Representative detection for each of the six targets, from live flight imagery.</figcaption>
+      <figcaption><span class="fig-no">FIG 6</span>Representative detection for each of the six targets, from live flight imagery.</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/quad-target-map.png" alt="Flight path in the Vicon world frame with six estimated target positions and 2-sigma error bars" loading="lazy">
-      <figcaption><span class="fig-no">FIG 4</span>Flight path and localized targets in the Vicon world frame, ±2σ per estimate (68 to 682 detections per target).</figcaption>
+      <figcaption><span class="fig-no">FIG 7</span>Flight path and localized targets in the Vicon world frame, ±2σ per estimate (68 to 682 detections per target).</figcaption>
     </figure>
 
     <h2><span class="sec-no">3.</span>Visual odometry front end</h2>
     <p>
-      The estimation half: a <strong>stereo visual-odometry</strong> pipeline
+      Lab 4 was a <strong>stereo visual-odometry</strong> pipeline
       run on the KITTI city dataset, computing relative pose from
-      frame-to-frame feature correspondences. Raw matches are contaminated
-      with outliers, so the pose estimate runs inside <strong>RANSAC</strong>:
-      hypothesize on minimal sets, score by inlier consensus, refit on the
-      winning inlier set. Over the ~65&nbsp;m KITTI drive the estimate tracks
+      frame-to-frame feature correspondences. Because the raw matches contain
+      outliers, pose is estimated with <strong>RANSAC</strong>: hypotheses
+      are fitted to minimal sets, scored by the number of inliers, and the
+      best hypothesis is refitted on its inlier set. Over the ~65&nbsp;m KITTI drive the estimate tracks
       ground truth with a mean per-frame position error of 1.23&nbsp;m
-      (cumulative RMSE 1.35&nbsp;m), dead-reckoned with no loop closure.
+      (cumulative RMSE 1.35&nbsp;m), without loop closure.
     </p>
 
     <figure class="fig">
       <video autoplay controls muted loop playsinline src="../assets/video/kitti-vo-tracking.mp4"></video>
-      <figcaption><span class="fig-no">FIG 5</span>Feature tracking on the KITTI drive: raw frame-to-frame matches (top, blue) vs the RANSAC-filtered inlier set driving the pose estimate (bottom, yellow).</figcaption>
+      <figcaption><span class="fig-no">FIG 8</span>Feature tracking on the KITTI drive: raw frame-to-frame matches (top, blue) vs the RANSAC-filtered inlier set driving the pose estimate (bottom, yellow).</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/quad-vo-topdown.png" alt="Top-down plot of the VO-estimated trajectory tracking the ground-truth path over a curved 60 m drive" loading="lazy">
-      <figcaption><span class="fig-no">FIG 6</span>VO estimate vs ground truth, top-down (KITTI 2011_09_26 drive 0005).</figcaption>
+      <figcaption><span class="fig-no">FIG 9</span>VO estimate vs ground truth, top-down (KITTI 2011_09_26 drive 0005).</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/quad-vo-results.png" alt="Three panels: X–Z trajectory comparison, per-frame position error with 1.23 m mean, and cumulative RMSE converging to 1.35 m" loading="lazy">
-      <figcaption><span class="fig-no">FIG 7</span>Error breakdown: per-frame position error and cumulative RMSE against ground truth.</figcaption>
+      <figcaption><span class="fig-no">FIG 10</span>Error breakdown: per-frame position error and cumulative RMSE against ground truth.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">4.</span>Where it leads</h2>
+    <h2><span class="sec-no">4.</span>Related work</h2>
     <p>
-      This coursework is the seed of <a href="rinnegan.html">Rinnegan</a>: the
-      same estimation problem, scaled from one vehicle's relative pose to a
+      The visual-odometry work led into <a href="rinnegan.html">Rinnegan</a>,
+      which extends relative pose estimation from one vehicle to a
       multi-agent factor graph.
     </p>
 

@@ -30,12 +30,13 @@
     <span class="card-index">02 / ACTIVE RESEARCH</span>
     <h1>Rinnegan</h1>
     <p class="subtitle">
-      GPS-denied cooperative perception for drone and wearable platforms.
-      N agents each run visual-inertial odometry; the team estimates a shared
-      reference frame online from inter-agent loop closures and robust
-      pose-graph optimization: no GPS, no central server, tolerant of degraded
-      comms. The product is relayed perception: what one agent sees, rendered
-      correctly in every other agent's view, including through walls.
+      GPS-denied cooperative perception for drone and wearable platforms. Each
+      of N agents runs visual-inertial odometry, and the team estimates a
+      shared reference frame online from inter-agent loop closures and robust
+      pose-graph optimization, without GPS or a central server and with
+      tolerance for degraded communication. The goal is relayed perception:
+      rendering what one agent detects correctly in every other agent's view,
+      including through walls.
     </p>
 
     <div class="motif" aria-hidden="true">
@@ -75,19 +76,19 @@
 
   <article class="article prose">
 
-    <h2><span class="sec-no">1.</span>The metric is relay, not ATE</h2>
+    <h2><span class="sec-no">1.</span>Evaluation metric: relay accuracy</h2>
     <p>
       Multi-robot SLAM systems (Kimera-Multi, DOOR-SLAM, Swarm-SLAM, COVINS-G)
       estimate a shared frame online from inter-agent loop closures, but they
-      score themselves on trajectory and map accuracy, not on whether a
-      teammate's detection lands correctly in <em>your</em> view. V2X
-      cooperative perception measures perception utility directly, but assumes
-      GPS/RTK hands every agent the shared frame for free. Rinnegan's
-      contribution is the composition: the shared frame is estimated
-      peer-to-peer with no server, and the headline metric is
-      <strong>relay utility</strong>: where a teammate's detection renders in
-      your view, in pixels and meters. Map merging is plumbing, not the
-      product.
+      are evaluated on trajectory and map accuracy rather than on whether one
+      agent's detection appears in the correct place in another agent's view.
+      V2X cooperative perception measures perception utility directly, but
+      assumes GPS/RTK provides the shared frame. Rinnegan combines the two:
+      the shared frame is estimated peer-to-peer without a server, and the
+      primary metric is <strong>relay utility</strong>, the error in pixels
+      and metres of a teammate's detection as rendered in the receiving
+      agent's view. Map merging is a means to that end rather than the result
+      being evaluated.
     </p>
 
     <figure class="fig">
@@ -97,7 +98,7 @@
 
     <figure class="fig">
       <video controls muted loop playsinline preload="metadata" src="../assets/video/rinnegan-flagship.mp4"></video>
-      <figcaption><span class="fig-no">FIG 2</span>Flagship demo story: cooperative relay under mission conditions.</figcaption>
+      <figcaption><span class="fig-no">FIG 2</span>Demonstration scenario: cooperative relay under mission conditions.</figcaption>
     </figure>
 
     <h2><span class="sec-no">2.</span>Per-agent pipeline</h2>
@@ -113,26 +114,27 @@
       <li><strong>Dense reconstruction</strong>: voxel-hash TSDF in C++/CUDA; the raycast HUD renders the shared map at 43&nbsp;FPS @ 640×480 (105&nbsp;FPS @ 320×240).</li>
     </ul>
     <p>
-      The core is C++ with a pybind11 bridge, so the Python eval harness and
-      scenario tooling drive the production pipeline rather than a
-      reimplementation. (The name: each subsystem is nicknamed for one of the
-      Six Paths of the Rinnegan, a shared visual ability across bodies.)
+      The core is C++ with a pybind11 bridge, so the Python evaluation
+      harness and scenario tooling run the production pipeline rather than a
+      reimplementation.
     </p>
 
     <h2><span class="sec-no">3.</span>Measured results</h2>
     <ul>
       <li>
-        <strong>Real-data cooperative relay, no ground truth anywhere</strong>:
-        two EuRoC sequences run as two agents: self-discovered inter-agent
-        closures recover the shared frame, relay error
-        <strong>0.159&nbsp;m vs 0.353&nbsp;m without cooperation</strong>
+        <strong>Real-data cooperative relay without ground truth</strong>: two
+        EuRoC sequences run as two agents. Inter-agent closures found by the
+        system recover the shared frame, with relay error
+        <strong>0.159&nbsp;m</strong> against 0.353&nbsp;m without cooperation
         (MH_01×MH_02).
       </li>
       <li>
-        <strong>Through-wall relay</strong>: a real Faster R-CNN detection of
-        a person behind a solid wall, relayed into a fully-occluded receiver's
-        view at <strong>0.14&nbsp;m</strong> (GT-exact frame); the earned-frame
-        corner-scene version lands at <strong>0.6&nbsp;px / 0.07&nbsp;m</strong>.
+        <strong>Through-wall relay</strong>: a real Faster R-CNN detection of a
+        person behind a solid wall, relayed into the view of a receiver with no
+        line of sight, at <strong>0.14&nbsp;m</strong> error with a
+        ground-truth shared frame. With the shared frame estimated by the
+        system instead, the corner-scene version reaches
+        <strong>0.6&nbsp;px / 0.07&nbsp;m</strong>.
       </li>
       <li>
         <strong>System budgets on real VIO</strong>: yaw drift is the binding
@@ -152,15 +154,15 @@
       <figcaption><span class="fig-no">FIG 4</span>Through-wall relay: agent A detects, fully-occluded agent B receives the target in its shared dense map (no GT).</figcaption>
     </figure>
 
-    <h2><span class="sec-no">4.</span>When cooperation hurts, and the gate that stops it</h2>
+    <h2><span class="sec-no">4.</span>Cases where cooperation degrades accuracy</h2>
     <p>
-      An honest negative result, measured and root-caused: under correlated
-      per-agent drift, pose-graph optimization can make relay <em>worse</em>
-      than raw odometry. Rinnegan characterizes the regime (cooperation helps
-      on overlapping trajectories, hurts on dissimilar ones) and runs a
-      GT-free <strong>do-no-harm trust gate</strong> that keeps cooperation
-      from ever degrading below odometry (helps on 3/4 EuRoC pairs, falls back
-      cleanly on the 4th).
+      Under correlated per-agent drift, pose-graph optimization can make relay
+      accuracy worse than raw odometry. We measured and traced this effect:
+      cooperation helps on overlapping trajectories and hurts on dissimilar
+      ones. Rinnegan includes a trust gate that needs no ground truth and
+      prevents cooperation from performing worse than odometry alone. On four
+      EuRoC pairs it improved the result on three and fell back to odometry on
+      the fourth.
     </p>
 
     <figure class="fig">
@@ -171,11 +173,11 @@
     <h2><span class="sec-no">5.</span>Simulation &amp; comms</h2>
     <p>
       Multi-agent scenarios run in <strong>NVIDIA Isaac Sim</strong> (bridge
-      inspection and through-wall scenes with per-agent cameras) alongside
-      real data from EuRoC and a RealSense D455. Each agent's stack runs in its
-      own container, communicating over <strong>ROS&nbsp;2 / FastDDS</strong>;
-      the comms-dropout demo has one of three agents go dark mid-mission and
-      reconcile on reconnect.
+      inspection and through-wall scenes with per-agent cameras), alongside
+      real data from EuRoC and a RealSense D455. Each agent's stack runs in
+      its own container and communicates over <strong>ROS&nbsp;2 /
+      FastDDS</strong>. In the communication-dropout test, one of three agents
+      loses its link mid-mission and reconciles its map on reconnection.
     </p>
 
     <figure class="fig">
@@ -183,13 +185,13 @@
       <figcaption><span class="fig-no">FIG 6</span>Isaac Sim bridge-inspection scene used for multi-agent relay runs.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">6.</span>Toward hardware</h2>
+    <h2><span class="sec-no">6.</span>Hardware plan</h2>
     <p>
-      The deployment path: learned-matcher inference via TensorRT, live OAK-D
-      stereo-inertial capture, an XR HUD consumer, and Jetson-class onboard
-      compute, with a <strong>7-inch 6S FPV quadrotor</strong> as the flying
-      platform. Interfaces are ROS&nbsp;2 end-to-end so the sim-validated stack
-      carries over unchanged.
+      The planned hardware setup uses learned-matcher inference via TensorRT,
+      live OAK-D stereo-inertial capture, an XR HUD, and Jetson-class onboard
+      compute, on a 7-inch 6S FPV quadrotor. All interfaces are ROS&nbsp;2, so
+      the stack validated in simulation can run on the vehicle without
+      interface changes.
     </p>
 
     <figure class="fig fig--todo">
