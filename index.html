@@ -138,48 +138,8 @@
         </div>
       </a>
 
-      <a class="card card--feature" href="projects/rook-flight-controller.html">
-        <div class="card-body">
-          <span class="card-index">03 / HARDWARE · CUSTOM FLIGHT CONTROLLER</span>
-          <h3>Rook: custom STM32H743 flight controller</h3>
-          <p>
-            A flight controller of my own design: a 4-layer STM32H743 board for
-            a 7-inch 6S quad, laid out pin-for-pin compatible with Betaflight
-            and ArduPilot so both firmware stacks can run on it with minimal porting. Reverse-poly
-            protected 6S power tree, ICM-42688-P gyro on a dedicated low-noise
-            LDO, whole schematic generated from code. Board routed, DRC-clean,
-            pre-fab.
-          </p>
-          <div class="card-tags">
-            <span class="tag tag--status">ROUTED · PRE-FAB</span>
-            <span class="tag">STM32H743</span>
-            <span class="tag">ICM-42688-P</span>
-            <span class="tag">KiCad</span>
-            <span class="tag">Betaflight</span>
-            <span class="tag">ArduPilot</span>
-          </div>
-        </div>
-        <div class="card-motif" aria-hidden="true">
-          <!-- X-quad frame with motor mixer + attitude triad -->
-          <svg viewBox="0 0 300 160" fill="none">
-            <path d="M70 40 L 170 120 M170 40 L 70 120" stroke="var(--ink-soft)" stroke-width="1.4"/>
-            <circle cx="70" cy="40" r="13" fill="none" stroke="var(--amber)" stroke-width="1.4"/>
-            <circle cx="170" cy="40" r="13" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>
-            <circle cx="70" cy="120" r="13" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>
-            <circle cx="170" cy="120" r="13" fill="none" stroke="var(--amber)" stroke-width="1.4"/>
-            <rect x="106" y="66" width="28" height="28" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="1.5"/>
-            <path d="M200 55 L 250 55 M200 80 L 250 80 M200 105 L 250 105" stroke="var(--ink-soft)" stroke-width="0.9" stroke-dasharray="3 3"/>
-            <circle cx="258" cy="55" r="4" fill="var(--amber)"/>
-            <circle cx="258" cy="80" r="4" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
-            <circle cx="258" cy="105" r="4" fill="none" stroke="var(--ink-soft)" stroke-width="1.2"/>
-            <circle cx="255" cy="135" r="16" fill="none" stroke="var(--line-strong)" stroke-width="1"/>
-            <path d="M255 135 L273 128 M255 135 L242 122 M255 135 L255 153" stroke="var(--amber)" stroke-width="1.2"/>
-          </svg>
-        </div>
-      </a>
-
       <a class="card" href="projects/drone-gate-navigation.html">
-        <span class="card-index">04 / AER1217</span>
+        <span class="card-index">03 / AER1217</span>
         <h3>Autonomous drone gate navigation</h3>
         <p>
           Informed RRT* global planning with degree-5 clamped B-spline smoothing,
@@ -194,7 +154,7 @@
       </a>
 
       <a class="card" href="projects/quadrotor-control.html">
-        <span class="card-index">05 / COURSEWORK</span>
+        <span class="card-index">04 / COURSEWORK</span>
         <h3>Quadrotor control &amp; visual odometry</h3>
         <p>
           PD, LQR, and MPC position controllers compared on a 4&nbsp;m/s
@@ -210,7 +170,7 @@
       </a>
 
       <a class="card" href="projects/kickbox-coach.html">
-        <span class="card-index">06 / HARDWARE</span>
+        <span class="card-index">05 / HARDWARE</span>
         <h3>Kickbox coach: strike-measurement pod</h3>
         <p>
           Wrist/ankle-worn BLE IMU pod capturing ±200&nbsp;g impact transients off a
@@ -226,7 +186,7 @@
       </a>
 
       <a class="card" href="projects/voron-24.html">
-        <span class="card-index">07 / FABRICATION</span>
+        <span class="card-index">06 / FABRICATION</span>
         <h3>Voron 2.4: self-built CoreXY printer</h3>
         <p>
           A CoreXY printer built from parts, running Klipper with sensorless
@@ -241,7 +201,7 @@
       </a>
 
       <a class="card" href="projects/fixed-wing-uav.html">
-        <span class="card-index">08 / COURSEWORK · AER1216</span>
+        <span class="card-index">07 / COURSEWORK · AER1216</span>
         <h3>Fixed-wing UAV modelling &amp; control</h3>
         <p>
           An Arctic patroller designed to a $400 propulsion budget: power-system
@@ -257,7 +217,7 @@
       </a>
 
       <a class="card" href="projects/multirotor-uav.html">
-        <span class="card-index">09 / COURSEWORK · AER1216</span>
+        <span class="card-index">08 / COURSEWORK · AER1216</span>
         <h3>Multirotor UAV modelling &amp; control</h3>
         <p>
           The quadrotor courier from the same Arctic proposal: Newton-Euler
@@ -274,7 +234,7 @@
       </a>
 
       <a class="card" href="projects/openscribe.html">
-        <span class="card-index">10 / HARDWARE + SELF-HOSTED</span>
+        <span class="card-index">09 / HARDWARE + SELF-HOSTED</span>
         <h3>OpenScribe: open-source voice recorder</h3>
         <p>
           A card-sized ESP32-S3 recorder of my own design that syncs to a
@@ -287,6 +247,23 @@
           <span class="tag">ESP32-S3</span>
           <span class="tag">Opus</span>
           <span class="tag">Whisper</span>
+        </div>
+      </a>
+
+      <a class="card" href="projects/rook-flight-controller.html">
+        <span class="card-index">10 / HARDWARE · FLIGHT CONTROLLER</span>
+        <h3>Rook: STM32H743 flight controller</h3>
+        <p>
+          A 4-layer flight controller for a 7-inch 6S quad, pin-compatible with
+          the MatekH743 target so Betaflight and ArduPilot run on it. The
+          schematic is generated from code; the board is routed and DRC-clean
+          but not yet fabricated.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">ROUTED · PRE-FAB</span>
+          <span class="tag">STM32H743</span>
+          <span class="tag">ICM-42688-P</span>
+          <span class="tag">KiCad</span>
         </div>
       </a>
 
