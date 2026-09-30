@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pursuit-evasion: behaviour trees and learned policies · mcgale.dev</title>
+  <meta name="description" content="A 2v2 pursuit-evasion testbed in MuJoCo comparing hand-written behaviour trees, learned policies, and behaviour-tree gating across three games, with a C++ runtime held to numerical parity with the Python research stack. Simulation only; staged toward tinywhoop drones under Vicon.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / 12</p>
+
+  <div class="project-head">
+    <span class="card-index">12 / AUTONOMY · SIMULATION · IN DEVELOPMENT</span>
+    <h1>Pursuit-evasion testbed</h1>
+    <p class="subtitle">
+      A 2v2 pursuit-evasion simulator in MuJoCo, built to measure when a
+      hand-written <strong>behaviour tree</strong> outperforms a
+      <strong>learned policy</strong>, when the reverse holds, and when a
+      behaviour tree that hands selected situations to the policy outperforms
+      both. The stack runs in two runtimes, a Python research stack and a C++
+      runtime, which CI holds to numerical parity. All results below are from
+      simulation; the planned hardware stage uses tinywhoop drones under Vicon
+      motion capture and has not started.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- two pursuit curves converging on two evader tracks, with a capture circle -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="88" x2="960" y2="88" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M60 20 C 260 20, 420 70, 640 52 S 860 30, 900 34" stroke="var(--ink-soft)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <path d="M60 80 C 240 80, 420 30, 620 44 S 820 64, 900 60" stroke="var(--ink-soft)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <path d="M20 58 C 220 70, 460 60, 640 52" stroke="var(--amber)" stroke-width="1.4"/>
+        <path d="M20 40 C 240 30, 500 50, 700 50 S 860 58, 900 60" stroke="var(--amber)" stroke-width="1.4"/>
+        <circle cx="640" cy="52" r="12" stroke="var(--amber)" stroke-width="1.2"/>
+        <circle cx="640" cy="52" r="3" fill="var(--amber)"/>
+        <circle cx="900" cy="60" r="3" fill="var(--ink-soft)"/>
+        <circle cx="900" cy="34" r="3" fill="var(--ink-soft)"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>Simulation only · CI passing · hardware stage not started</dd></div>
+      <div><dt>Simulator</dt><dd>MuJoCo · 2v2 point-mass agents · 3 games</dd></div>
+      <div><dt>Learning</dt><dd>Self-play PPO (Stable-Baselines3) · behaviour cloning · DAgger</dd></div>
+      <div><dt>Gating</dt><dd>py_trees (Python) · BehaviorTree.CPP + Groot2 (C++)</dd></div>
+      <div><dt>Runtime</dt><dd>C++ · MuJoCo C API · ONNX Runtime · runtime safety filter</dd></div>
+      <div><dt>Tests</dt><dd>73 Python · 33 C++ · cross-runtime parity check in CI</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <figure class="fig">
+      <video controls muted loop playsinline preload="metadata" src="../assets/video/pe-rollout-bt.mp4"></video>
+      <figcaption><span class="fig-no">FIG 1</span>A <code>tag</code> episode rendered in MuJoCo: red pursuers under the behaviour-tree gate, blue evaders under the scripted controller.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">1.</span>Motivation</h2>
+    <p>
+      Autonomy stacks commonly combine a behaviour tree with a learned policy,
+      handing the policy the situations that are hard to script. The choice of
+      which situations to hand over is usually made by intuition. In this
+      project the choice is measured instead. Each controller type and each
+      gate branch is evaluated on identical starting states, and a branch is kept only if it improves the
+      win rate by more than the run-to-run noise.
+    </p>
+
+    <h2><span class="sec-no">2.</span>Games</h2>
+    <p>
+      One simulator supports three games. A game specification sets the
+      objective, the airframes, and the spawn geometry, so the controllers,
+      observations, metrics, gate, and safety filter are shared across all
+      three. Missile dynamics are implemented as a transform on the
+      controller's command rather than as a separate physics model: a missile
+      keeps thrust along its velocity vector, has limited lateral authority and
+      a finite burn, and is removed once it slows below stall speed.
+    </p>
+    <table class="spec">
+      <thead><tr><th>Game</th><th>Pursuer side</th><th>Evader side</th><th>Pursuer side wins if</th></tr></thead>
+      <tbody>
+        <tr><td><code>tag</code></td><td>Drones, 5.25&nbsp;m/s</td><td>Drones, 4.75&nbsp;m/s</td><td>Both evaders are tagged before timeout</td></tr>
+        <tr><td><code>assault</code></td><td>Interceptors, 7.5&nbsp;m/s</td><td>Missiles, 11&nbsp;m/s</td><td>The defended asset is never breached</td></tr>
+        <tr><td><code>escort</code></td><td>Interceptors, 7.5&nbsp;m/s</td><td>Missiles, long burn</td><td>The convoy reaches its goal</td></tr>
+      </tbody>
+    </table>
+    <p>
+      In the two air-defence games the missiles are faster than the
+      interceptors, so a tail chase cannot succeed and every engagement is a
+      crossing intercept. Captures in those games are checked at every physics
+      substep, because a crossing pass spends only a short chord inside the
+      capture radius.
+    </p>
+
+    <h2><span class="sec-no">3.</span>Controllers</h2>
+    <ul>
+      <li>
+        <strong>Scripted:</strong> lead-intercept pursuit and guidance laws,
+        tuned so that scripted pursuers capture in roughly 40 to 50% of
+        <code>tag</code> episodes, which leaves room to measure improvement.
+      </li>
+      <li>
+        <strong>Learned:</strong> self-play PPO from scratch reached a 0%
+        capture rate in <code>tag</code>. Behaviour cloning of the scripted
+        controller also reached 0%, despite a training MSE of 0.003, which is
+        consistent with covariate shift: the cloned policy drifts into states
+        the expert never visited. DAgger, which relabels the states the policy
+        actually reaches, raised the capture rate to 20%.
+      </li>
+      <li>
+        <strong>Behaviour-tree gate:</strong> runs the scripted controller by
+        default and hands control to the learned policy when specific
+        predicates hold. Each game has its own gate profile.
+      </li>
+      <li>
+        <strong>Safety filter:</strong> a runtime filter below both the tree and
+        the policy that enforces a geofence and a speed cap and can override
+        any command.
+      </li>
+    </ul>
+
+    <h2><span class="sec-no">4.</span>Results</h2>
+    <p>
+      Win rate for the pursuer side over 200 episodes per cell:
+    </p>
+    <table class="spec">
+      <thead><tr><th>Game</th><th>Scripted</th><th>Best learned</th><th>BT-gated</th><th>BT-gated + safety filter</th></tr></thead>
+      <tbody>
+        <tr><td><code>tag</code> (capture)</td><td><strong>0.46</strong></td><td>0.20</td><td>0.19</td><td>0.46</td></tr>
+        <tr><td><code>assault</code> (asset held)</td><td>0.54</td><td>0.04</td><td><strong>0.72</strong></td><td>0.72</td></tr>
+        <tr><td><code>escort</code> (convoy through)</td><td>0.40</td><td>0.25</td><td><strong>0.46</strong></td><td>0.44</td></tr>
+      </tbody>
+    </table>
+    <p>
+      In <code>tag</code>, the scripted lead-intercept law is well defined in
+      every state, and gating does not improve on it. In the air-defence games
+      there are states in which no lead-intercept solution exists; the scripted
+      defender then parks at a static point. Handing exactly those states to
+      the learned policy raised the <code>assault</code> win rate from 0.54 to
+      0.72, although the policy on its own wins only 0.04.
+    </p>
+
+    <h2><span class="sec-no">5.</span>Gate ablation</h2>
+    <p>
+      Gate profiles were derived by ablation: predicates are added one at a
+      time on identical seeds, evaluated on two blocks of 150 episodes each.
+    </p>
+    <ul>
+      <li>
+        <strong>Defender gate (<code>assault</code>).</strong> Adding the
+        single branch "no intercept solution exists" raised the win rate from
+        0.54 / 0.43 to 0.70 / 0.68 across the two seed blocks. A second branch
+        added nothing and was removed.
+      </li>
+      <li>
+        <strong>Porting the <code>tag</code> profile.</strong> <code>tag</code>'s
+        gate hands close-quarters situations to the policy. Applied to
+        <code>assault</code>, that branch reduced the win rate from 0.70 to
+        0.12, lower than not gating at all.
+      </li>
+      <li>
+        <strong>Attacker gate.</strong> On the missile side, no learned branch
+        improved the breach rate. It fell from 0.46 / 0.57 with scripted
+        guidance alone to 0.37 / 0.38 with the full gate and 0.33 / 0.35 with
+        the policy alone. Both learned branches were
+        deleted, and the shipped attacker gate routes everything to the scripted
+        controller.
+      </li>
+    </ul>
+    <p>
+      The resulting rule is to gate where the scripted controller is
+      undefined, not where the situation appears complex. A few
+      points of difference at 150 episodes is treated as noise.
+    </p>
+
+    <h2><span class="sec-no">6.</span>Two runtimes and parity</h2>
+    <p>
+      Training and research run in Python (MuJoCo Python bindings, SB3,
+      py_trees). The deployment target is a separate C++ runtime: the MuJoCo C
+      API, a BehaviorTree.CPP gate defined in Groot2-editable XML with live
+      Groot2 monitoring, and the policy exported to ONNX and run through ONNX
+      Runtime. Both runtimes load the same generated arena models and link the
+      same MuJoCo library, and the observation encoding, scripted controllers,
+      gate predicates, and safety filter are mirrored line for line.
+    </p>
+    <p>
+      CI runs both on five fixed starting states and requires matching
+      checksums. The C++ runner can also load Python's exact start states, so
+      aggregate metrics can be compared rather than single rollouts. On the
+      air-defence games the runtimes agree exactly, including per-counter
+      safety-filter interventions. On <code>tag</code>, long chaotic chases
+      flip a small number of binary outcomes.
+    </p>
+    <p>
+      Parity does not catch errors that both runtimes share. The command
+      clip was originally applied per component rather than by vector norm,
+      which allowed a diagonal command to produce 1.73× the intended thrust:
+      a measured top speed of 7.42&nbsp;m/s against a documented 5.25&nbsp;m/s.
+      The scripted controllers only emit unit-norm directions and never
+      triggered it, but learned policies use the full action range. A
+      physical-invariant test found it; both runtimes now clip by norm, pinned
+      by <code>test_drone_thrust_is_isotropic</code> in each.
+    </p>
+
+    <h2><span class="sec-no">7.</span>Robustness to link degradation</h2>
+    <p>
+      To estimate how the results transfer to hardware, a link layer wraps any
+      controller with modelled failure modes of a Vicon and radio-link setup:
+      state latency, command latency, packet loss, dropout, position and
+      velocity noise, motor lag, battery sag, and identity swaps between
+      tracked agents. The perfect-link setting is pinned bit-identical to the
+      unwrapped controller by a test. Sweeps use 150 episodes per point with
+      paired seeds, 95% Wilson intervals, and a paired bootstrap for
+      differences.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/pe-robust-presets.png" alt="Line plot of assault win rate for scripted, DAgger, BT-gated, and BT-gated with safety filter across four link-quality presets; all but DAgger fall toward about 0.1 at the worst preset" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span><code>assault</code> win rate across four link presets (x = 0 to 3: perfect, well-run Vicon lab, busy Vicon lab, degraded field link). n = 150 per point, shaded bands are 95% Wilson intervals.</figcaption>
+    </figure>
+
+    <p>
+      The gate's advantage over the scripted defender is +0.23 with a perfect
+      link, +0.16 under the well-run Vicon preset, +0.08 under the busy preset,
+      and zero under the degraded field preset. On the single-axis latency
+      sweep it stops being significant at 40&nbsp;ms. Under degradation the
+      safety filter changes from redundant to necessary: at 60&nbsp;ms of
+      latency, the gated controller with the filter wins 0.21 more often than
+      without it. The gate's advantage holds up under identity swaps (+0.18 at
+      ten times a realistic swap rate) and moderate occlusion (+0.13 at 8% per
+      tick); latency is the axis that removes it.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/pe-robust-latency.png" alt="Line plot of assault win rate against state latency from 0 to 120 milliseconds; the gated and scripted curves fall to about 0.05 by 60 milliseconds while the gated controller with safety filter degrades more slowly; a dashed vertical line marks 76 milliseconds" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span><code>assault</code> win rate against state latency. The dashed line is the latency budget, capture radius divided by closing speed (76&nbsp;ms).</figcaption>
+    </figure>
+
+    <p>
+      The latency at which each curve reaches its floor is predicted without
+      simulation by a latency budget, capture radius divided by closing speed:
+      76&nbsp;ms for <code>assault</code>. At tinywhoop scale the same ratio
+      gives about 50&nbsp;ms, which sets a requirement on the motion-capture
+      and radio link for the hardware stage.
+    </p>
+
+    <h2><span class="sec-no">8.</span>Handover debounce (reverted)</h2>
+    <p>
+      As the link degraded, the defender gate handed control to the policy
+      more often: the handover rate rose from 16% to 22%. The hypothesis was that a
+      noisy state estimate was briefly reading as "no intercept solution
+      exists." The proposed fix required the infeasible condition to persist
+      for <em>k</em> ticks before handing over.
+    </p>
+    <p>
+      The debounce was implemented in both runtimes and swept over
+      <em>k</em>&nbsp;=&nbsp;1, 2, 3 on the <code>assault</code> latency
+      sweep. With a perfect link the gated win rate fell from 0.71 to 0.59 to
+      0.49 as <em>k</em> increased (paired difference between <em>k</em>&nbsp;=&nbsp;3
+      and <em>k</em>&nbsp;=&nbsp;1: −0.22, significant), and no latency setting
+      recovered any of the loss. Episode traces showed that genuine infeasible
+      intervals last 20 to 30 ticks and do not flicker, so the debounce only
+      delayed the handover against an 11&nbsp;m/s missile. The change was
+      reverted, and immediate handover is now pinned by
+      <code>test_defender_handover_is_immediate</code> in both runtimes. The
+      loss under latency belongs to the policy, and the safety filter is the
+      mitigation.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/pe-debounce-k3.png" alt="Latency sweep for assault with the k equals 3 debounce: the gated controller starts near 0.49 at zero latency instead of about 0.71 without the debounce" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>The same latency sweep with the <em>k</em>&nbsp;=&nbsp;3 debounce. The gated controller starts at about 0.49 at zero latency, against about 0.71 without it (FIG 3).</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">9.</span>Instrumentation</h2>
+    <p>
+      An explorer tool writes a self-contained HTML replay of any episode,
+      showing per tick which gate branch fired, every predicate's value, the
+      commands the scripted controller and the policy each proposed, where the
+      safety filter intervened, and, under a degraded link, the true state
+      against the controller's belief. Failure logs store spawn states, so any
+      episode can be replayed exactly.
+    </p>
+
+    <h2><span class="sec-no">10.</span>Status and next steps</h2>
+    <p>
+      All three games run end to end in both runtimes, with the Python and C++
+      test suites and the parity check passing in CI. The agents are point
+      masses with no attitude dynamics, which is the largest remaining gap to
+      real vehicles. The next step is a 6-DoF underactuated quadrotor model,
+      which will require retraining all policies and recalibrating both gate
+      profiles. The link-degradation layer also needs to be mirrored into
+      C++, and the safety filter needs inter-agent separation before two real
+      airframes share a flight volume. The hardware stage (2 to 4 tinywhoops
+      in a Vicon volume) has not started: motion-capture access is not
+      confirmed and no airframe or radio link has been chosen or ordered.
+    </p>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="air-quality-node.html">← 11 · AQI node</a>
+    <a href="../index.html">index →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

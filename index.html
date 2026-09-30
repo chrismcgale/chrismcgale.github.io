@@ -54,7 +54,7 @@
         <circle cx="120" cy="7" r="2.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
         <rect x="166" y="3" width="8" height="8" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
       </svg>
-      <span class="count">11 entries</span>
+      <span class="count">12 entries</span>
     </div>
 
     <div class="card-grid">
@@ -307,6 +307,24 @@
         </div>
       </a>
 
+      <a class="card" href="projects/pursuit-evasion.html">
+        <span class="card-index">12 / AUTONOMY · SIMULATION</span>
+        <h3>Pursuit-evasion: behaviour trees and learned policies</h3>
+        <p>
+          A 2v2 MuJoCo testbed measuring where a behaviour tree should hand
+          control to a learned policy. Gating the one state with no intercept
+          solution raised the air-defence win rate from 0.54 to 0.72. Python
+          and C++ runtimes are held to numerical parity in CI.
+        </p>
+        <div class="card-tags">
+          <span class="tag tag--status">SIMULATION</span>
+          <span class="tag">MuJoCo</span>
+          <span class="tag">PPO / DAgger</span>
+          <span class="tag">BehaviorTree.CPP</span>
+          <span class="tag">C++</span>
+        </div>
+      </a>
+
     </div>
   </section>
 
@@ -318,12 +336,12 @@
         <circle cx="70" cy="7" r="2.5" fill="var(--amber)"/>
         <ellipse cx="150" cy="7" rx="8" ry="3.5" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>
       </svg>
-      <span class="count">01 declared</span>
+      <span class="count">02 declared</span>
     </div>
 
     <div class="card-grid">
       <div class="card card--todo">
-        <span class="card-index">12 / HARDWARE</span>
+        <span class="card-index">13 / HARDWARE</span>
         <h3>7-inch 6S quad build</h3>
         <p>
           A test vehicle for Rinnegan (Jetson + OAK-D) and, later,
@@ -332,6 +350,18 @@
           design.
         </p>
         <span class="todo-note">TODO: build log + bench photos + first flight logs</span>
+      </div>
+      <div class="card card--todo">
+        <span class="card-index">14 / FPGA · RF</span>
+        <h3>2.4&nbsp;GHz FMCW radar on an ECP5 FPGA</h3>
+        <p>
+          The full range FFT, MTI and CFAR chain in SystemVerilog, built with
+          the open-source yosys / nextpnr flow. It closes timing at 62.37&nbsp;MHz
+          on a Lattice ECP5-85F and matches a Python reference model bit for
+          bit in simulation. The RF front-end board is routed but not yet
+          assembled or tested.
+        </p>
+        <span class="todo-note">TODO: RF board bring-up + first measured range-Doppler data</span>
       </div>
     </div>
   </section>

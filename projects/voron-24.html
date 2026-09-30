@@ -52,6 +52,7 @@
       <div><dt>Kinematics</dt><dd>CoreXY, flying gantry (2.4)</dd></div>
       <div><dt>Firmware</dt><dd>Klipper · sensorless homing</dd></div>
       <div><dt>Build</dt><dd>Built from individual parts, not a kit</dd></div>
+      <div><dt>Print pipeline</dt><dd>Headless OrcaSlicer CLI · G-code post-processing · Moonraker API upload + monitoring</dd></div>
     </dl>
   </div>
 
@@ -92,7 +93,70 @@
       <figcaption><span class="fig-no">FIG 6</span>Walkaround of the finished build.</figcaption>
     </figure>
 
-    <h2><span class="sec-no">2.</span>Use in other projects</h2>
+    <h2><span class="sec-no">2.</span>Print pipeline</h2>
+    <p>
+      Prints are prepared and sent by a set of scripts rather than through the
+      slicer GUI, so every print uses the same validated settings and the same
+      checks. The pipeline has four stages: slice, post-process, upload, and
+      monitor.
+    </p>
+    <ul>
+      <li>
+        <strong>Slice.</strong> <code>slice_part.sh</code> runs the OrcaSlicer
+        command-line interface headlessly. It arranges the STL files, merges a
+        shared machine configuration with the tuned PLA profile, and exposes a
+        small set of parameters (nozzle temperature, layer heights, walls,
+        infill, brim, z-hop, supports) with defaults validated on real prints:
+        210&nbsp;°C nozzle, 0.20&nbsp;mm first layer, 0.2&nbsp;mm z-hop, and
+        travel moves routed inside the walls.
+      </li>
+      <li>
+        <strong>Post-process.</strong> Two scripts edit the sliced G-code.
+        <code>bed_stepdown.py</code> holds the bed at 70&nbsp;°C for the first
+        three layers and then drops it to 60&nbsp;°C with a non-blocking
+        command, because the slicer only distinguishes first-layer and
+        other-layer bed temperatures. <code>sensor_guard.py</code> disables the
+        filament motion sensor through the slow first layers and re-enables it
+        at layer 6. At crawl speeds the sensor's encoder produces too few pulses
+        and reports false jams.
+      </li>
+      <li>
+        <strong>Upload.</strong> <code>print_send.sh</code> uploads through the
+        Moonraker HTTP API and only starts a print after an explicit
+        confirmation. Copying the file into the printer's G-code directory and
+        starting immediately races Moonraker's in-place file processing and
+        aborted a print with "Unable to parse move", so the API is the only
+        upload path.
+      </li>
+      <li>
+        <strong>Monitor.</strong> <code>print_watch.sh</code> polls printer
+        state, temperatures, and layer progress, and exits with a distinct code
+        for each terminal condition (complete, host unreachable, firmware halt,
+        error, cancelled, paused, thermal fault, stall). It does not cancel a
+        print itself.
+      </li>
+    </ul>
+    <p>
+      Heating is owned by the printer's <code>PRINT_START</code> macro, which
+      holds the nozzle at a 60&nbsp;°C standby during homing and gantry
+      levelling, soaks the bed, and brings the nozzle to print temperature only
+      at the purge line. Heating the nozzle to full temperature earlier causes
+      it to ooze throughout levelling. Both the slice and upload stages reject
+      any G-code that contains its own heat-and-wait commands
+      (<code>M109</code>/<code>M190</code>).
+    </p>
+    <p>
+      Two first-layer defects were traced through this pipeline. Restart lines
+      lifting off the bed followed the toolpath rather than bed position,
+      which pointed to the slicer settings rather than bed levelling; reducing
+      the first-layer height from 0.25 to 0.20&nbsp;mm and the z-hop from 0.6
+      to 0.2&nbsp;mm resolved it. Separately, a <code>z_offset</code> of
+      0.1&nbsp;mm in the shared slicer configuration had been raising every
+      first layer from 0.25 to 0.35&nbsp;mm; it is now fixed at zero as an
+      invariant of the pipeline.
+    </p>
+
+    <h2><span class="sec-no">3.</span>Use in other projects</h2>
     <p>
       Parts printed on this machine for other projects include:
     </p>
