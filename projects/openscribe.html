@@ -113,13 +113,18 @@
     </p>
 
     <figure class="fig">
+      <img src="../assets/img/openscribe-spice-buck.png" alt="Two SPICE plots. Left: the 3.3 V rail during a 500 mA WiFi transmit step, dipping briefly to about 3.27 V with a mid-charge cell and 3.17 V with a low cell, both above the 3.0 V module minimum. Right: rail voltage at 500 mA against cell voltage, falling below 3.3 V as the cell drops toward 3.0 V" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>SPICE check of the 3.3&nbsp;V buck rail (TPS62840) during a 500&nbsp;mA WiFi transmit burst, with copper resistance extracted from the routed board. The loop model is deliberately fast-recovering, so the droop is an upper bound. The rail minimum is 3.27&nbsp;V with a mid-charge cell and 3.17&nbsp;V with a low cell, against the ESP32-S3's 3.0&nbsp;V minimum. Right: at 500&nbsp;mA the regulator runs out of headroom as the cell discharges, which the firmware handles.</figcaption>
+    </figure>
+
+    <figure class="fig">
       <img src="../assets/img/openscribe-pcb-top.png" alt="Top-down KiCad render of the OpenScribe PCB" loading="lazy">
-      <figcaption><span class="fig-no">FIG 2</span>Top-side render. The board outline is taken from the same card frame used by the floorplan script and the enclosure CAD, so the two stay consistent.</figcaption>
+      <figcaption><span class="fig-no">FIG 3</span>Top-side render. The board outline is taken from the same card frame used by the floorplan script and the enclosure CAD, so the two stay consistent.</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/openscribe-fit-assembly.png" alt="OpenSCAD fit-check assembly: green PCB and a large flat LiPo cell inside an orange rounded-rectangle shell with screw pedestals" loading="lazy">
-      <figcaption><span class="fig-no">FIG 3</span>Fit-check assembly in OpenSCAD: board, cell, wiring and M2 closure pedestals in the 6.8&nbsp;mm-thick shell. This model is used for stack-height checks until a full MCAD model exists.</figcaption>
+      <figcaption><span class="fig-no">FIG 4</span>Fit-check assembly in OpenSCAD: board, cell, wiring and M2 closure pedestals in the 6.8&nbsp;mm-thick shell. This model is used for stack-height checks until a full MCAD model exists.</figcaption>
     </figure>
 
     <h2><span class="sec-no">3.</span>The server</h2>

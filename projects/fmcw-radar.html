@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.4 GHz FMCW radar on an ECP5 FPGA · mcgale.dev</title>
+  <meta name="description" content="Work in progress: a 2.4 GHz FMCW radar whose range FFT, MTI and CFAR chain runs on a Lattice ECP5-85F, built with the open-source yosys / nextpnr flow and verified bit-exact against a Python reference model. The RF front-end board is designed; no radar data has been measured yet.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../main.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <a class="wordmark" href="../index.html">mcgale<span class="tld">.dev</span></a>
+    <nav class="site-nav">
+      <a href="../index.html#projects">projects</a>
+      <a href="../index.html#contact">contact</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme">[dark]</button>
+    </nav>
+  </header>
+
+  <p class="crumb"><a href="../index.html">index</a> / next up / 14</p>
+
+  <div class="project-head">
+    <span class="card-index">14 / NEXT UP · FPGA · RF · PRE-HARDWARE</span>
+    <h1>2.4&nbsp;GHz FMCW radar on an ECP5 FPGA</h1>
+    <p class="subtitle">
+      A frequency-modulated continuous-wave radar whose real-time signal
+      processing (range FFT, corner turn, Doppler FFT, clutter filtering and
+      CFAR detection) runs in SystemVerilog on a Lattice ECP5-85F, built with
+      the open-source yosys / nextpnr toolchain. It is my ECE1521 (Detection
+      and Estimation) course project, focused on detecting people and drones.
+      The digital chain is complete in simulation and meets timing on the
+      FPGA; the RF front-end board is designed but not yet built, and no
+      radar data has been measured.
+    </p>
+
+    <div class="motif" aria-hidden="true">
+      <!-- sawtooth chirp, then a range-bin spectrum with one detected peak -->
+      <svg viewBox="0 0 960 100" preserveAspectRatio="none" fill="none">
+        <line x1="0" y1="88" x2="960" y2="88" stroke="var(--line-strong)" stroke-width="1"/>
+        <path d="M30 80 L 130 24 L 130 80 L 230 24 L 230 80 L 330 24 L 330 80 L 430 24" stroke="var(--amber)" stroke-width="1.4"/>
+        <path d="M30 80 L 150 24 M150 80 L 250 24 M250 80 L 350 24" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="4 3"/>
+        <path d="M500 86 L 540 84 L 580 85 L 620 82 L 650 78 L 670 30 L 690 76 L 720 83 L 760 84 L 800 85 L 840 84 L 880 86 L 920 85" stroke="var(--ink-soft)" stroke-width="1.2"/>
+        <line x1="500" y1="60" x2="920" y2="60" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3 3"/>
+        <circle cx="670" cy="30" r="4" fill="var(--amber)"/>
+      </svg>
+    </div>
+
+    <dl class="meta-block">
+      <div><dt>Status</dt><dd>RTL complete · simulation passing · timing met · RF board designed, not built · no measured data</dd></div>
+      <div><dt>FPGA</dt><dd>Lattice ECP5-85F evaluation board · sv2v → yosys → nextpnr-ecp5</dd></div>
+      <div><dt>Timing</dt><dd>62.37&nbsp;MHz achieved vs 60&nbsp;MHz target (full chain)</dd></div>
+      <div><dt>Resources</dt><dd>13.3k LUT4 (15%) · 44 DP16KD (21%) · 61 MULT18 (39%) · 4.2k FF</dd></div>
+      <div><dt>Verification</dt><dd>cocotb + Verilator, 65/65 tests · bit-exact vs Python reference model</dd></div>
+      <div><dt>RF</dt><dd>2.45&nbsp;GHz · ADF4158 PLL + CVCO55CC VCO · 2×2 patch arrays</dd></div>
+    </dl>
+  </div>
+
+  <article class="article prose">
+
+    <h2><span class="sec-no">1.</span>Signal chain</h2>
+    <p>
+      The ADC samples the beat signal from the RF board over SPI. On the FPGA,
+      each chirp is windowed and transformed by a 1024-point range FFT (a
+      parameterised radix-2 single-path delay-feedback core). A corner-turn
+      memory reorders 64 chirps so that a 64-point FFT across chirps gives
+      Doppler. A moving-target-indication filter (selectable order 0, 1 or 2)
+      suppresses static clutter, and a CFAR detector (ordered-statistic or
+      cell-averaging) sets a local threshold per cell. Detections and raw
+      range-Doppler frames stream to the host over UART.
+    </p>
+    <table class="spec">
+      <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Carrier</td><td>2.45&nbsp;GHz (λ = 12.24&nbsp;cm)</td></tr>
+        <tr><td>Sweep bandwidth</td><td>30&nbsp;MHz radiating (2435 to 2465&nbsp;MHz, RSS-210 Annex F); 80&nbsp;MHz for bench loopback only</td></tr>
+        <tr><td>Samples per chirp / chirps per frame</td><td>1024 / 64</td></tr>
+        <tr><td>Default rate</td><td>100&nbsp;kS/s, 10.24&nbsp;ms chirp, 1.5 frames/s</td></tr>
+        <tr><td>Range resolution</td><td>c / 2B ≈ 5&nbsp;m at 30&nbsp;MHz</td></tr>
+        <tr><td>Velocity span / resolution</td><td>±3.0&nbsp;m/s / 0.094&nbsp;m/s (default rate)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The legal radiating bandwidth limits range resolution to about 5&nbsp;m,
+      so the planned experiments rely on Doppler and on sub-bin range
+      accuracy rather than on resolving closely spaced targets.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/radar-rd-map-sim.png" alt="Two simulated range-Doppler maps. Left, raw: a strong stationary return at 3 m and zero velocity dominates, with a weaker moving target near 5 m at 1 m/s. Right, after MTI: the stationary return is removed and only the moving target remains" loading="lazy">
+      <figcaption><span class="fig-no">FIG 1</span>Simulated output of the reference model: a target moving at 1&nbsp;m/s at 5&nbsp;m next to static wall clutter at 3&nbsp;m, 40&nbsp;dB stronger. Left: raw range-Doppler map. Right: after single-delay MTI, which removes the zero-velocity clutter. This is simulation, not measured data.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">2.</span>Verification and synthesis</h2>
+    <p>
+      Every block has a cocotb testbench run under Verilator, and the full
+      regression (65 tests) passes. The complete chain is compared
+      bit-for-bit against an independent Python reference model on four
+      scenes with no mismatches; the reference model is maintained separately
+      from the RTL so that it stays an independent check. Every bug found
+      becomes a permanent regression test before it is fixed.
+    </p>
+    <p>
+      The full design places and routes on the ECP5-85F at 62.37&nbsp;MHz
+      against a 60&nbsp;MHz target, using 15% of the LUTs, 21% of the block
+      RAM and 39% of the hardware multipliers. The flow is entirely
+      open-source: sv2v, yosys, nextpnr-ecp5, Project Trellis and
+      openFPGALoader.
+    </p>
+
+    <h2><span class="sec-no">3.</span>RF front end</h2>
+    <p>
+      The front-end board generates the chirp with an ADF4158 fractional-N PLL
+      driving a CVCO55CC VCO, and carries the transmit chain and the receive
+      chain down to the baseband amplifiers feeding the ADC. It connects to
+      the FPGA board through a ribbon header. Revision B adds an RF interlock.
+      The VCO's regulator is enabled only by a heartbeat signal from the FPGA,
+      so the board cannot transmit while the FPGA is unconfigured, being
+      reprogrammed, or stopped. Revision B is routed and passes DRC with full
+      schematic parity.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/radar-rf-revb.png" alt="KiCad 3D render of the RF front-end board, revision B: a dark green rectangular board with a 2x20 header along the top edge and surface-mount RF and baseband components across the board" loading="lazy">
+      <figcaption><span class="fig-no">FIG 2</span>RF front-end board, revision B (KiCad render), with the 2×20 header to the FPGA board along the top edge.</figcaption>
+    </figure>
+
+    <p>
+      The transmit and receive antennas are 2×2 microstrip patch arrays,
+      designed and simulated in openEMS with the radome in place. The
+      simulated realised gain is 5.04&nbsp;dBi with 40.3% efficiency, and
+      the simulated transmit-to-receive isolation is −34.4&nbsp;dB. These
+      are simulation results; the panels have not been measured.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/radar-patch-panel.png" alt="Layout drawing of the antenna panel: two 2x2 patch arrays, one on each side, each fed by a corporate microstrip network, with dimensions in millimetres" loading="lazy">
+      <figcaption><span class="fig-no">FIG 3</span>Antenna panel layout: transmit and receive 2×2 patch arrays with their microstrip feed networks, dimensions in millimetres.</figcaption>
+    </figure>
+
+    <h2><span class="sec-no">4.</span>Status and next steps</h2>
+    <p>
+      The FPGA evaluation board and VCO are on hand. The RF board and antenna
+      panels are ready to order, and the bring-up software has so far only run
+      against a software model of the hardware. Once real beat-signal data
+      exists, the course work covers CFAR false-alarm rates checked by Monte
+      Carlo and a measured ROC curve, range and velocity estimation error
+      against the Cramér-Rao bound, a Kalman tracker, and classification of
+      empty scenes, walkers and drones from micro-Doppler. Detection through
+      a wall is a stretch goal. If the custom front end does not produce clean
+      data in time, a commercial 60&nbsp;GHz radar kit is the fallback for
+      real measurements.
+    </p>
+
+  </article>
+
+  <nav class="project-nav">
+    <a href="pursuit-evasion.html">← 12 · Pursuit-evasion</a>
+    <a href="../index.html">index →</a>
+  </nav>
+
+  <footer class="site-footer">
+    <span>© 2026 Chris McGale</span>
+    <span class="links">
+      <a href="https://github.com/chrismcgale">github</a>
+      <a href="mailto:chrismcgale@gmail.com">email</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

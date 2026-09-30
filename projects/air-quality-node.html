@@ -107,6 +107,27 @@
     </figure>
 
     <p>
+      The vents were later recut as vertical slots so that the shell prints
+      without supports in its dock-down orientation. At the same 224&nbsp;mm²
+      open area, CFD gives the same back-pressure for vertical and horizontal
+      slots (128 and 129&nbsp;mPa). Aligning all three vent banks to one
+      height was also simulated and rejected: it removed the convective path
+      past the temperature sensor and raised its predicted temperature rise
+      from +5&nbsp;K to +38&nbsp;K, so each bank stays at its functional
+      height.
+    </p>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-vents-before-after.png" alt="Four renders of the blue puck shell comparing horizontal louvre grilles (left column) with the vertical-slot versions (right column) on two sides of the enclosure" loading="lazy">
+      <figcaption><span class="fig-no">FIG 4</span>Vent redesign. Left: horizontal louvres. Right: vertical slots, which are self-supporting when printed. Top row: the sensor-side grilles; bottom row: the cross-vent.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <img src="../assets/img/aqi-xray-hero.png" alt="Semi-transparent render of the grey cylindrical shell from below, showing vertical vent slots on the curved wall and the circular opening in the bottom face" loading="lazy">
+      <figcaption><span class="fig-no">FIG 5</span>Shell render with transparency, showing the vertical vent slots on the curved wall.</figcaption>
+    </figure>
+
+    <p>
       The mechanical CAD is parametric and checked by automated tests before
       printing. One test confirms that every part is a single connected body,
       one confirms that each part slices without supports, and one runs
@@ -142,13 +163,18 @@
     </p>
 
     <figure class="fig">
+      <img src="../assets/img/aqi-spice-i2c.png" alt="SPICE plot of I2C line voltage against time for three load cases, all crossing the 0.7 VDD threshold well within the 1000 ns rise-time limit" loading="lazy">
+      <figcaption><span class="fig-no">FIG 6</span>SPICE check of I²C rise time with a 2.2&nbsp;kΩ pull-up, using capacitance extracted from the routed board. Board only: 33.7&nbsp;pF, 62.8&nbsp;ns. With the SEN55 cable: 48.7&nbsp;pF, 90.8&nbsp;ns. With a worst-case external Qwiic device: 108.7&nbsp;pF, 202.6&nbsp;ns. The standard-mode limit is 1000&nbsp;ns.</figcaption>
+    </figure>
+
+    <figure class="fig">
       <img src="../assets/img/aqi-pcb-iso.png" alt="Isometric KiCad 3D render of the black AQI node board, top side: ESP32-S3-MINI-1 land pattern, the SCD41 CO2 sensor footprint in the middle, USB-C at the top edge, JST connectors, and gold power test points" loading="lazy">
-      <figcaption><span class="fig-no">FIG 4</span>Top side, KiCad 3D render. ESP32-S3-MINI-1 land pattern (module body not modelled), the SCD41 CO₂ sensor in the middle, USB-C, the SEN55 cable (left) and LED-ring header (front), plus gold test pads for bring-up.</figcaption>
+      <figcaption><span class="fig-no">FIG 7</span>Top side, KiCad 3D render. ESP32-S3-MINI-1 land pattern (module body not modelled), the SCD41 CO₂ sensor in the middle, USB-C, the SEN55 cable (left) and LED-ring header (front), plus gold test pads for bring-up.</figcaption>
     </figure>
 
     <figure class="fig">
       <img src="../assets/img/aqi-pcb-bottom.png" alt="Isometric KiCad 3D render of the AQI node board's bottom side: buck converter and shielded inductor, a large electrolytic bulk capacitor, two tactile buttons, and passives" loading="lazy">
-      <figcaption><span class="fig-no">FIG 5</span>Bottom side. The buck converter, its inductor, the 5&nbsp;V bulk capacitor and the BOOT/RESET buttons are on this side, away from the sensors on the top face.</figcaption>
+      <figcaption><span class="fig-no">FIG 8</span>Bottom side. The buck converter, its inductor, the 5&nbsp;V bulk capacitor and the BOOT/RESET buttons are on this side, away from the sensors on the top face.</figcaption>
     </figure>
 
   </article>
